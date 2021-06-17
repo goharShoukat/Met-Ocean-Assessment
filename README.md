@@ -14,12 +14,13 @@ This tool is designed to run with Python 3.7 and above. The following additional
 - PyQt5
 
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
-pip install netcdf4
-pip install cartopy
-pip install pyqt5 
+- $ pip install netcdf4
+- $ pip install cartopy
+- $ pip install pyqt5 
 
 Please be warned that downloading and installing libraries from Spyder's terminal may break the dependencies of your pre-existing libraries that come with Anaconda. Please open an issue and let us know if this is the case. 
 
+The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
 
 ## Version 0:
 This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. A sample code is shown:
