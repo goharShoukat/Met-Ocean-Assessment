@@ -23,6 +23,14 @@ Please be warned that downloading and installing libraries from Spyder's termina
 The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
 
 ## Version 0:
-This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. A sample code is shown:
+This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. The following inputs are required:
+
+- Longitudnal boundaries
+- Latitudnal boundaries
+- Map type - Orthographic or Platecarre
+- Path to save the time series data
+- Path to save the Images
+- Video output of the time series - True or False
+
 
  
