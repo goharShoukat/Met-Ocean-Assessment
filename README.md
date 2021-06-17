@@ -3,7 +3,7 @@ This tool is designed to automate the process of met ocean assessments for a sit
 
 git clone https://github.com/goharShoukat/Met-Ocean-Assessment.git
 
-Occasionaly, using the command:
+Occasionaly, use the command from your terminal after entering the folder where the repositor was cloned:
 git pull
 
 This automatically updates the library and provides all new functionalities that the contributors have included. 
