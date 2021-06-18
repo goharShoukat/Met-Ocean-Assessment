@@ -12,6 +12,7 @@ This tool is designed to run with Python 3.7 and above. The following additional
 - Netfcdf4
 - Cartopy
 - PyQt5
+- datetime
 
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
 - $ pip install netcdf4
