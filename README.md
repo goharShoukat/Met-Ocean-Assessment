@@ -25,7 +25,9 @@ The tool can be used with both Windows and Mac OS. Any changes to this will be h
 
 ## Version 0:
 This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. The following inputs are required:
-
+- Directory housing the ERA5 datasets
+- Output type: A joint time series covering the time period for all the datasets or inidividual time series for each file
+- Number of files to study. The user can choose to analyse single file or multiple files. 
 - Longitudnal boundaries
 - Latitudnal boundaries
 - Map type - Orthographic or Platecarre
