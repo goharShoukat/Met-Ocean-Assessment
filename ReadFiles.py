@@ -13,7 +13,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from datetime import datetime, timedelta  #libraries required to convert the time column of netcdf4
 import pandas as pd
-
+from pathlib import Path
 
 class ERA5():
     def __init__(self, directory, output = 'Joint', N = False, lon1 = False, lon2 = False, lat1 = False, lat2 = False):
@@ -39,12 +39,14 @@ class ERA5():
         
     def load(self):
         files = os.listdir(self.directory)
-        files = np.sort(files)
-        out_dir = os.mkdir('ERA5 Formatted Files/')
+        files = np.sort(files)[1:]
+        out_dir = 'ERA5 Formatted Files/'
+        if not os.path.isdir(out_dir):
+            os.mkdir(out_dir)
         
         #if else structure to support code in the for loop for joint data frame output
         if self.output == 'Joint':
-            self.joint_df = pd.DataFrame()
+            joint_df = pd.DataFrame()
 
         #the following sequence is initiated if the user wants to study all the 
         #files in the directory
@@ -52,7 +54,7 @@ class ERA5():
         if self.N == False:
             for file in files:
                 #load each file one by one
-                f = Dataset(file, 'r')
+                f = Dataset(self.directory + file, 'r') #common mistake is to not provide full path of the dataset
                             
                 #unpack all the variables
                 lon = f.variables['longitude'][:]
@@ -113,20 +115,29 @@ class ERA5():
                 self.df['mwp'] = mwp_arr
                 #df['u10'] = u10_arr
                 #df['v10'] = v10_arr
+                df = self.df
+                del swh_arr, mwd_arr, mwp_arr #delete variables to avoid memory overload
+               
                 
-                del swh_arr, mwd_arr, mwp_arrv #delete variables to avoid memory overload
                 
                 if self.output == 'Separate':
                     self.df.to_csv(out_dir + file[:-3] +'.csv')
                     
                 elif self.output == 'Joint':
-                    self.joint_df.append(self.df)
-            if self.output == 'Joint':
-                self.joint_df.to_csv(out_dir + 'Joint.csv')
+                    joint_df = pd.concat([joint_df, self.df], ignore_index=True)
+                   
+                else:
+                    pass
+            
+        if self.output == 'Joint':
+            joint_df.to_csv(out_dir + 'Joint.csv')
+                
 
                     
             
         else:
             pass
+        
+
                 
                 
