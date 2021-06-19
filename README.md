@@ -28,6 +28,7 @@ This is the first release and a test bed. This version will house all the script
 - Directory housing the ERA5 datasets
 - Output type: A joint time series covering the time period for all the datasets or inidividual time series for each file
 - Number of files to study. The user can choose to analyse single file or multiple files. 
+- Should the user to specifiy N = 1 (Number of files), the next argument should include the file name. 
 - Longitudnal boundaries
 - Latitudnal boundaries
 - Map type - Orthographic or Platecarre
@@ -36,4 +37,4 @@ This is the first release and a test bed. This version will house all the script
 - Video output of the time series - True or False
 
 
- 
+This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
