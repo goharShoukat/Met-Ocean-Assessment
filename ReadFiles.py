@@ -16,7 +16,7 @@ import pandas as pd
 from pathlib import Path
 
 class ERA5():
-    def __init__(self, directory, output = 'Joint', N = False, lon1 = False, lon2 = False, lat1 = False, lat2 = False):
+    def __init__(self, directory, output = 'Joint', N = False, Single_file_name = False, lon1 = False, lon2 = False, lat1 = False, lat2 = False):
         #inputs
         #directory : provide path of the directory housing the data files
         #output : string : user choses between joint and seperate
@@ -27,7 +27,7 @@ class ERA5():
         #lon2 : floating point : longitudnal value of the second vertex
         #lat1 : floating point : latitudnal value of the first vertex
         #lat2 : floating point : latitudnal value of the second vertx
-    
+        #signle file name : string : if the user choses to study just one file, N = 1 and the file name needs to be provided. 
         self.directory = directory
         self.output = output 
         self.lon1 = lon1
@@ -35,12 +35,15 @@ class ERA5():
         self.lat1 = lat1
         self.lat2 = lat2
         self.N = N
+        self.Single_file_name = Single_file_name
         
         
     def load(self):
         files = os.listdir(self.directory)
         files = np.sort(files)[1:]
         out_dir = 'ERA5 Formatted Files/'
+        
+        #create folder to write time series
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)
         
@@ -115,7 +118,7 @@ class ERA5():
                 self.df['mwp'] = mwp_arr
                 #df['u10'] = u10_arr
                 #df['v10'] = v10_arr
-                df = self.df
+                
                 del swh_arr, mwd_arr, mwp_arr #delete variables to avoid memory overload
                
                 
@@ -135,8 +138,10 @@ class ERA5():
 
                     
             
+        elif == 1:
+            
         else:
-            pass
+            print('Error: Please provide either directory for all files or type N = 1 followed by file name in the direcctory')
         
 
                 
