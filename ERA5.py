@@ -4,6 +4,9 @@
 Created on Thu Jun 17 15:45:32 2021
 
 @author: goharshoukat
+
+ERA5. This code defines ERA5 as a class which for specific coordinates,
+creates time series data in different format. 
 """
 
 import os
@@ -22,43 +25,43 @@ class ERA5():
         #output : string : user choses between joint and seperate
         #if seperate is chosen, each file's time series is saved seperately
         #if joint is chosen, the entire series from all the years is combined into one
-        #N : integer : user defines if only one particular file has to be used or all of them. 
-        #lon1 : floating point : longitudnal value of the first vertex 
+        #N : integer : user defines if only one particular file has to be used or all of them.
+        #lon1 : floating point : longitudnal value of the first vertex
         #lon2 : floating point : longitudnal value of the second vertex
         #lat1 : floating point : latitudnal value of the first vertex
         #lat2 : floating point : latitudnal value of the second vertx
-        #signle file name : string : if the user choses to study just one file, N = 1 and the file name needs to be provided. 
+        #signle file name : string : if the user choses to study just one file, N = 1 and the file name needs to be provided.
         self.directory = directory
-        self.output = output 
+        self.output = output
         self.lon1 = lon1
         self.lon2 = lon2
         self.lat1 = lat1
         self.lat2 = lat2
         self.N = N
         self.Single_file_name = Single_file_name
-        
-        
+
+
     def load(self):
         files = os.listdir(self.directory)
         files = np.sort(files)[1:]
         out_dir = 'ERA5 Formatted Files/'
-        
+
         #create folder to write time series
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)
-        
+
         #if else structure to support code in the for loop for joint data frame output
         if self.output == 'Joint':
             joint_df = pd.DataFrame()
 
-        #the following sequence is initiated if the user wants to study all the 
+        #the following sequence is initiated if the user wants to study all the
         #files in the directory
-        
+
         if self.N == False:
             for file in files:
                 #load each file one by one
                 f = Dataset(self.directory + file, 'r') #common mistake is to not provide full path of the dataset
-                            
+
                 #unpack all the variables
                 lon = f.variables['longitude'][:]
                 lat = f.variables['latitude'][:]
@@ -69,7 +72,7 @@ class ERA5():
                 mwd = np.deg2rad(f.variables['mwd'][:]); mwd_units = f.variables['mwd'].units #units now are radians for mwd after conversion to raidans
                 mwp = f.variables['mwp'][:]; mwp_units = f.variables['mwp'].units
                 dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
-                
+
                 #collapse the 3D arrays into 2D arrays
                 #the rows represent the variation in time
                 #the progression in columns represents the flattened array of lat and long
@@ -80,7 +83,7 @@ class ERA5():
                 swh_updated = pd.DataFrame(np.reshape(swh, (-1,np.shape(swh)[1] * np.shape(swh)[2])).T)
                 mwd_updated = pd.DataFrame(np.reshape(mwd, (-1,np.shape(mwd)[1] * np.shape(mwd)[2])).T)
                 mwp_updated = pd.DataFrame(np.reshape(mwp, (-1,np.shape(mwp)[1] * np.shape(mwp)[2])).T)
-                
+
                 del swh, mwd, mwp #delete variables not required furhter. this will save memory consumption
                 #first column will be longitude
                 #second column will be latitude
@@ -90,8 +93,8 @@ class ERA5():
                 LON, LAT = np.meshgrid(lon, lat)
                 LON = LON.flatten(); LAT = LAT.flatten()
                 columns = np.array(['longitude', 'latitude'])
-                
-                       
+
+
                 #create an array with the multiple columns representing the time steps
                 #flatten the array with column major
                 swh_arr = np.array(swh_updated).flatten('F')
@@ -99,17 +102,17 @@ class ERA5():
                 #v10_arr = np.array(v10_updated).flatten('F')
                 mwd_arr = np.array(mwd_updated).flatten('F')
                 mwp_arr = np.array(mwp_updated).flatten('F')
-                
+
                 del swh_updated, mwd_updated, mwp_updated    #varilables not required further. step to avoid RAM overload
-                #declare a dataframe with the long and lat repeated for the entire length 
-                #of the dtime. 
+                #declare a dataframe with the long and lat repeated for the entire length
+                #of the dtime.
                 self.df = pd.DataFrame(columns = columns)
                 self.df = pd.DataFrame({'Date' : None, 'longitude' : np.tile(LON, len(dtime)), \
                                    'latitude' : np.tile(LAT, len(dtime))})
                 #declare a dtime dataframe with repeated values for the length of the long and lat
                 #dt = (pd.DataFrame({'Date' : dtime[:]}))
-                
-                #following code is to reproduce 
+
+                #following code is to reproduce
                 x = np.array(dtime[:])
                 x = np.repeat(x, len(lon)*len(lat))
                 self.df['Date'] = x
@@ -118,31 +121,27 @@ class ERA5():
                 self.df['mwp'] = mwp_arr
                 #df['u10'] = u10_arr
                 #df['v10'] = v10_arr
-                
+
                 del swh_arr, mwd_arr, mwp_arr #delete variables to avoid memory overload
-               
-                
-                
+
+
+
                 if self.output == 'Separate':
                     self.df.to_csv(out_dir + file[:-3] +'.csv')
-                    
+
                 elif self.output == 'Joint':
                     joint_df = pd.concat([joint_df, self.df], ignore_index=True)
-                   
+
                 else:
                     pass
-            
+
         if self.output == 'Joint':
             joint_df.to_csv(out_dir + 'Joint.csv')
-                
 
-                    
-            
+
+
+
         elif == 1:
-            
+
         else:
             print('Error: Please provide either directory for all files or type N = 1 followed by file name in the direcctory')
-        
-
-                
-                
