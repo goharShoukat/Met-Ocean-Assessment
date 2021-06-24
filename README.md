@@ -26,16 +26,18 @@ The tool can be used with both Windows and Mac OS. Any changes to this will be h
 ## Version 0:
 This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. The following inputs are required:
 - Directory housing the ERA5 datasets
-- Output type: A joint time series covering the time period for all the datasets or inidividual time series for each file
-- Number of files to study. The user can choose to analyse single file or multiple files. 
-- Should the user to specifiy N = 1 (Number of files), the next argument should include the file name. 
-- Longitudnal boundaries
-- Latitudnal boundaries
-- Map type - Orthographic or Platecarre
-- Path to save the time series data
-- Path to save the Images
-- Video output of the time series - True or False
 
+The code provides multiple functionalities to the user:
+- The user can study a bounded region.
+- Evaluate data at a single coordinate.
+
+For a bounded region, the user will need to use the following two functions:
+bounded_region() - this function takes the two opposite vertices. The bounded region can only be in the shape of rectange
+load_bounded_region() - this function then extracts the information about the three variables - swh, mwp and mwd. For now this is hardcoded. 
+
+The code also provides additional features to carry out data extraction for a signle data point throught the function:
+- load_coordinate_data() - this function requires the user to input the longitude and latitude of the point of interest. If the coordinates do not snap to a grid point, the function calculates the nearest neighour and uses the data for that particular point. 
+- It also informs the user of the distance between the specified point and the one being used. 
 
 This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
 
