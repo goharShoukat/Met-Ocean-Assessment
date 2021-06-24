@@ -18,6 +18,143 @@ from datetime import datetime, timedelta  #libraries required to convert the tim
 import pandas as pd
 from pathlib import Path
 
+
+class ERA5():
+    def __init__(self, directory):
+        #inputs
+        #directory : string : provide path of the directory housing the data files
+        self.directory = directory
+        
+    
+    def bounded_region(self, lon1, lat1, lon2, lat2):
+        #This function is used to provide information about a bounded region
+        #Needs to be run only once. This does not load the data. 
+        #it only finds the bounded region
+        #a rectangular shape is must. it can not work on arbitraty quadratic shapes
+        #lon1 : floating point : 0 < lon < 359.5 longitudnal value of the first vertex
+        #lon2 : floating point : longitudnal value of the second vertex
+        #Ensure lon1 < lon2
+        #lat1 : floating point : -90 < lat < 90 latitudnal value of the first vertex
+        #lat2 : floating point : latitudnal value of the second vertex
+        #Ensure lat1 < lat2
+        #convert these points to the nearest points from the grid
+        #output : dict object : contains the indices and the corresponding values
+        self.files = os.listdir(self.directory)
+        self.files = np.sort(self.files)[1:] #there is an additional file by the name ./dstore which needs to be removed. 
+        #out_dir = 'ERA5 Formatted Files/'
+        
+        #this function loads the first file to extract the longitude and latitude information
+        f = Dataset(self.directory + self.files[0], 'r') #common mistake is to not provide full path of the dataset
+
+        #unpack all the variables
+        self.lon = f.variables['longitude'][:]
+        self.lat = f.variables['latitude'][:]
+        
+        self.vertex1 = self.nearest_point(self.lon, self.lat, lon1, lat1)
+        self.vertex2 = self.nearest_point(self.lon, self.lat, lon2, lat2)
+        
+    def nearest_point(self, lon_file, lat_file, lon_user, lat_user):
+        #function to calculate the nearest data points
+        #lon_file : Array of float64 : Array passed on from the netcdf file
+        #lat_file : Array of float64 : Array passed on from the netcdf file
+        #lon_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
+        #lat_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
+        
+        #Output
+        #Dictionary data type with the indexes and the corresponding values 
+        #of longitude and latitude from the original file
+        idx_lon = np.abs(lon_file - lon_user).argmin()
+        idx_lat = np.abs(lat_file - lon_user).argmin()
+        output_dict = {'longitude index': idx_lon, 'latitude index': idx_lat, \
+                       'longitude' : lon_file[idx_lon], 'latitude' : lat_file[idx_lat]}
+        return output_dict
+    
+    def load_bounded_region(self, output_directory, file_type = 'Joint'):
+
+        #this function will load the data files and extract the values for the bounded region
+        #inputs
+        #output_directory : string : path where the bounded region files will be saved
+        #file_type : string : 'Joint' or 'Separate : Joint creates one single data file, Separate creates one output per input file
+        #create folder to write time series
+        if not os.path.isdir(output_directory):
+            os.mkdir(output_directory)
+
+        #if else structure to support code in the for loop for joint data frame output
+        if file_type == 'Joint':
+            joint_df = pd.DataFrame()
+            
+        for file in self.files:
+            f = Dataset(self.directory + self.file, 'r') #common mistake is to not provide full path of the dataset
+            #unpac variables of intereset
+            time = f.variables['time']
+            dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
+            swh = f.variables['swh'][:]; swh_units = f.variables['swh'].units
+            mwd = np.deg2rad(f.variables['mwd'][:]); mwd_units = f.variables['mwd'].units #units now are radians for mwd after conversion to raidans
+            mwp = f.variables['mwp'][:]; mwp_units = f.variables['mwp'].units
+            
+            #extract the bounded region
+            #+1 is incldued in the slicing because the end point is not included. 
+            #by adding 1 to the end point, the last coordinate data is also included
+            lon_reg = self.lon[self.vertex1['lon index']:self.vertex2['lon index']+1]
+            lat_reg = self.lat[self.vertex1['lat index']:self.vertex2['lat index']+1]
+            swh_reg = swh[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
+            mwd_reg = mwd[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
+            mwp_reg = mwp[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
+            
+            #collapse the 3D arrays into 2D arrays
+            #the rows represent the variation in time
+            #the progression in columns represents the flattened array of lat and long
+            #transpose the arrays to fit into the dataframe in the next frame
+            #convert to dataframe after transposing so that the two dataframes can be merged
+            swh_updated = pd.DataFrame(np.reshape(swh_reg, (-1,np.shape(swh_reg)[1] * np.shape(swh_reg)[2])).T)
+            mwd_updated = pd.DataFrame(np.reshape(mwd_reg, (-1,np.shape(mwd_reg)[1] * np.shape(mwd_reg)[2])).T)
+            mwp_updated = pd.DataFrame(np.reshape(mwp_reg, (-1,np.shape(mwp_reg)[1] * np.shape(mwp_reg)[2])).T)
+            
+            #first column will be longitude
+            #second column will be latitude
+            LON, LAT = np.meshgrid(lon_reg, lat_reg)
+            LON = LON.flatten(); LAT = LAT.flatten()
+            columns = np.array(['longitude', 'latitude'])
+            
+            
+            #create an array with the multiple columns representing the time steps
+            #flatten the array with column major
+            swh_arr = np.array(swh_updated).flatten('F')
+            mwd_arr = np.array(mwd_updated).flatten('F')
+            mwp_arr = np.array(mwp_updated).flatten('F')
+        
+            #declare a dataframe with the long and lat repeated for the entire length
+                #of the dtime.
+            df = pd.DataFrame(columns = columns)
+            df = pd.DataFrame({'Date' : None, 'longitude' : np.tile(LON, len(dtime)), \
+                                   'latitude' : np.tile(LAT, len(dtime))})
+            
+                
+                #declare a dtime dataframe with repeated values for the length of the long and lat
+            #dt = (pd.DataFrame({'Date' : dtime[:]}))
+
+            #following code is to reproduce
+            x = np.array(dtime[:])
+            x = np.repeat(x, len(lon_reg)*len(lat_reg))
+            df['Date'] = x
+            df['swh'] = swh_arr
+            df['mwd'] = mwd_arr
+            df['mwp'] = mwp_arr
+                
+            
+            if file_type == 'Separate':
+                df.to_csv(output_directory + file[:-3] +'.csv')
+
+            elif file_type == 'Joint':
+                joint_df = pd.concat([joint_df, df], ignore_index=True)
+                
+        if file_type == 'Joint':
+            joint_df.to_csv(output_directory + 'Joint.csv')
+            
+            
+'''        
+        
+
 class ERA5():
     def __init__(self, directory, output = 'Joint', N = False, Single_file_name = False, lon1 = False, lon2 = False, lat1 = False, lat2 = False):
         #inputs
@@ -144,6 +281,4 @@ class ERA5():
         else:
             print('Error: Please provide either directory for all files or type N = 1 followed by file name in the direcctory')
 
-directory = 'Try/'
-x = ERA5(directory, 'Joint')
-x.load()
+'''
