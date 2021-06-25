@@ -6,7 +6,7 @@ git clone https://github.com/goharShoukat/Met-Ocean-Assessment.git
 Occasionaly, use the command from your terminal after entering the folder where the repositor was cloned:
 git pull
 
-This automatically updates the library and provides all new functionalities that the contributors have included. 
+This automatically updates the library and provides all new functionalities that the contributors have included. For the two commands stated above to work with the terminal, 'git' has to be installed in your system. If it isn't, then manually clone the repository from Github. This however means that every time you wish to sync the repository with the source code, a manual download will be required which can lead to loss of old data files.  
 
 This tool is designed to run with Python 3.7 and above. The following additional  libraries are needed to successfully run this program:
 - Netfcdf4
@@ -30,12 +30,12 @@ This is the first release and a test bed. This version will house all the script
 The code provides multiple functionalities to the user:
 - The user can study a bounded region.
 - Evaluate data at a single coordinate.
+The ERA5 class has two different paths through which the class can be accessed. If the user wishes to proceed with the bounded region, the following set of functions can be used:
+- bounded_region() - this function takes the two opposite vertices. The bounded region can only be in the shape of rectange
+- load_bounded_region() - this function then extracts the information about the three variables - swh, mwp and mwd. For now this is hardcoded.-
 
-For a bounded region, the user will need to use the following two functions:
-bounded_region() - this function takes the two opposite vertices. The bounded region can only be in the shape of rectange
-load_bounded_region() - this function then extracts the information about the three variables - swh, mwp and mwd. For now this is hardcoded. 
 
-The code also provides additional features to carry out data extraction for a signle data point throught the function:
+If however, only a single point analyses is required, the library functions available are much more powerful, versatile and greater in number: 
 - load_coordinate_data() - this function requires the user to input the longitude and latitude of the point of interest. If the coordinates do not snap to a grid point, the function calculates the nearest neighour and uses the data for that particular point. 
 - It also informs the user of the distance between the specified point and the one being used. 
 
