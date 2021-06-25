@@ -43,6 +43,9 @@ This class takes in a number of arguments. All these make it extremely important
 
 The structure of the code is kept basic for ease of editing. The three variables obtained from netcdf files - 'swh', 'mwd', 'mwp', are hard coded for now. It is important therefore that any input file must have these 3 variables. Future iterations will make the code more generalisable and will provide all class functionalities for any available key within the netcdf file.
 
+### Warnings:
 It is also important to note that the data files should all be homogenous. That is, they should have the same spatial resolution and have the same latitudnal and longitudnal coverage. The code can not adjust to varying coverage across data files.  
+
+The Netcdf4 files used as sample data for this code have variables written to the raw files with a fill_value = -32767. When unpacking these variables into an array, the empty cells are automatically filled with the stated fill value. However, this fill value may not always be used by the raw files or might have a different value altogether. This will have to be adjusted manually. 
 ### Windows Users:
 The code is hard coded to avoid an hidden or cached files which maybe included within the directory folder passed on as an argument to the program. There is a chance that the first data file might be missing in the output csv. Please flag this issue if you encounter it by opening up an issue. We will resolve it in the next iteration. 

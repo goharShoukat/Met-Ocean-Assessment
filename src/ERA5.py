@@ -24,7 +24,51 @@ class ERA5():
         #inputs
         #directory : string : provide path of the directory housing the data files
         self.directory = directory
-    
+        
+    def load_files(self, variable):
+        #code functioins for one variable at a time. 
+        #input
+        #variable : string : user defines the variable to study
+        files =np.sort(os.listdir(self.directory))[1:] #gets rid of the hidden file
+        #exVract information about the size of the array from the first file in the list
+        f = Dataset(self.directory + files[0], 'r')
+        
+        
+        self.lon = np.array(f.variables['longitude'][:])
+        self.lat = np.array(f.variables['latitude'][:])
+        
+        #for the code to work, information from the first file needs to be extracted
+        #from all other files, append the reults. 
+        #lon and lat remain the same. variable data and time information chagnes
+        
+        arr = np.array(f.variables[variable])
+        time = f.variables['time'] 
+        dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
+        
+        
+        if len(files) > 1:
+        #in the event a single file is passed, the code will still function    
+            for file in files[1:]:#since first file info extracted, start with second onwards
+                dset = Dataset(self.directory + file, 'r') 
+                time2 = dset.variables['time']
+                dtime2 = num2date(time2[:], time2.units) #hours since 1900-1-1 00:00:00"
+                dtime = np.concatenate([dtime, dtime2], axis = 0) #append with dtime from first file
+                
+                var = np.array(dset.variables[variable]) #extract values for current file
+                arr = np.concatenate([arr, var], axis = 0)#merge with the first file data
+            
+                
+        arr[arr == -32767] = None #important step as netcdf variables created with fill_value of -32767
+        arr = np.around(arr, decimals=2) #rounds off the values to a 
+        self.cache = {'time' : dtime, 'latitude' : self.lat, 'longitude' : self.lon, variable : arr}
+        return self.cache
+            
+            
+        
+            
+                
+        
+        
     
     
     
