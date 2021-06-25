@@ -13,12 +13,12 @@ This tool is designed to run with Python 3.7 and above. The following additional
 - Cartopy
 - PyQt5
 - datetime
-
+- haversine
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
 - $ pip install netcdf4
 - $ pip install cartopy
 - $ pip install pyqt5 
-
+- $ pip install haversine
 Please be warned that downloading and installing libraries from Spyder's terminal may break the dependencies of your pre-existing libraries that come with Anaconda. Please open an issue and let us know if this is the case. 
 
 The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
@@ -41,6 +41,8 @@ The code also provides additional features to carry out data extraction for a si
 
 This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
 
-The structure of the code is kept basic for ease of editing. The three variables obtained from netcdf files - 'swh', 'mwd', 'mwp', are hard coded for now. It is important therefore that any input file must have these 3 variables. Future iterations will make the code more generalisable and will provide all class functionalities for any available key within the netcdf file. 
+The structure of the code is kept basic for ease of editing. The three variables obtained from netcdf files - 'swh', 'mwd', 'mwp', are hard coded for now. It is important therefore that any input file must have these 3 variables. Future iterations will make the code more generalisable and will provide all class functionalities for any available key within the netcdf file.
+
+It is also important to note that the data files should all be homogenous. That is, they should have the same spatial resolution and have the same latitudnal and longitudnal coverage. The code can not adjust to varying coverage across data files.  
 ### Windows Users:
 The code is hard coded to avoid an hidden or cached files which maybe included within the directory folder passed on as an argument to the program. There is a chance that the first data file might be missing in the output csv. Please flag this issue if you encounter it by opening up an issue. We will resolve it in the next iteration. 

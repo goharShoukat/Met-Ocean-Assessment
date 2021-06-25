@@ -17,14 +17,40 @@ import cartopy.crs as ccrs
 from datetime import datetime, timedelta  #libraries required to convert the time column of netcdf4
 import pandas as pd
 from pathlib import Path
-
+from haversine import haversine
 
 class ERA5():
     def __init__(self, directory):
         #inputs
         #directory : string : provide path of the directory housing the data files
         self.directory = directory
-        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     def bounded_region(self, lon1, lat1, lon2, lat2):
         #This function is used to provide information about a bounded region
@@ -72,11 +98,75 @@ class ERA5():
     def check_availability(self):
         #function to evaluate percentage of the times the data point has 
         #availability of data
-        pass
+        #function can only be used if file_type == 'Joint'
+        #this function sums up the number of data points that are empty in the series and returns a percentage
+        
+        return self.joint_df[self.variable].isnull().sum()/len(self.joint_df) * 100 #calculate the percentage of data availabiliity
     
+    def next_nearest_point(self, array, row_idx, col_idx, radius):
+        #if user inputs coordinates and availability for the data point comes out low
+        #the next_nearest_point_availibility function will calculate 3 other nearest points
+      
+        #input
+        #array : 2D float64/int : data array to find the nearest neighours from
+        #slice the raw data file to include only one time stamp. 
+        #this step only needs access to neighouring 
+        #row_idx : int : row index for the center point for which nearest neighour needs to be searched
+        #col_idx : int : index for the center point for which nearest neighour needs to be searched
+        #radius : int : not the radius of search. raidus within the array. specify if the search radius needs to be for instance 2 element or 3 element in all directions. 
+       
+        #output
+        #returns a list
+        #index of the nearest neighours
+        #first element is row index, second element is column index
+        
+        #i iterates over row
+        #j iterates over column
+        
+        above_i = row_idx + radius + 1 #defines the higher limt of row iterator
+        if above_i > len(array) - 1: #takes into account the array length to avoid crossing index limits
+            above_i = len(array)
+        
+        below_i = row_idx - radius #defines lower limit
+        if below_i < 0: #takes into account the zero index
+            below_i = 0
+            
+            
+        above_j = col_idx + radius + 1 #defines the higher limit of column iterator
+        if above_j > len(array) - 1: #takes the end index into account
+            above_j = len(array)
+        
+        below_j = col_idx - radius #defines the lower limit of column iterator
+        if below_j < 0: #takes zero index into account
+            below_j = 0
+            
+        indices = list()
+        for i in range(below_i, above_i):
+            for j in range(below_j, above_j):
+                indices.append(i, j) 
+        
+        
+    
+        
+        return indices
+
+    
+    def calculate_dist(self, lat_user, lon_user, lat_nearest, lon_nearest):
+        #input
+        #lat_user : float64 : user specified latitude value
+        #lon_user : float64 : user specified longitude value
+        #lat_nearest : float64 : user specified latitude value
+        #lon_nearest : float64 : user specified longitude value
+        #output
+        #distance between the two coordinates
+        user_input = (lat_user, lon_user) #lat, lon
+        nearest_point = (lat_nearest, lon_nearest)
+        return haversine(user_input, nearest_point) #returns value in km
+        
+'''        
     def load_coordinate_data(self, lon_user, lat_user, variable, output_directory, file_type = 'Joint'):
         #Function to extract information about a single point
-        
+        self.variable = variable #reference variable to access in other functions of the class
         #input
         #lon_user : float64 : longitudnal value for which information is required
         #lat_user : float64 : latitudnal value for which information is required
@@ -86,15 +176,17 @@ class ERA5():
         #file_type : string : 
         #if exact grid points for which data is available not entered, function 
         #finds the nearest data point. 
-        nearest_grid_point = self.near_point(self.lon, self.lat, lon_user, lat_user)
+        self.nearest_grid_piont = self.near_point(self.lon, self.lat, lon_user, lat_user)
+        dist = self.calculate_dist(lat_user, lon_user, self.nearest_grid_piont['latitude'], self.nearest_grid_piont['longitude'])
         
         if not lon_user in self.lon and lat_user in self.lat:
             print ('The entered longitudnal coordinate does not have an associated value, value from the closest data point will be used.')
-            print('The nearest point to your query is: Longitude: ' + str(nearest_grid_point['longitude']) + ', Latitude - ' + str(nearest_grid_point['latitude']))
-        
+            print('The nearest point to your query is: Longitude: ' + str(self.nearest_grid_piont['longitude']) + ', Latitude - ' + str(self.nearest_grid_piont['latitude']))
+            print('Distance between entered point and the nearest available point is: ' + str(dist))
+            
         #if else structure to support code in the for loop for joint data frame output
         if file_type == 'Joint':
-            joint_df = pd.DataFrame()
+            self.joint_df = pd.DataFrame()
             
         for file in self.files:
             f = Dataset(self.directory + file, 'r')
@@ -102,29 +194,29 @@ class ERA5():
             time = f.variables['time']
             dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
             #unpack variable of interest into var
-            var = f.variables[variable][:]
+            self.var = f.variables[self.variable][:]
             #slice the var to extract the data for the data point only
-            var_point = var[:, nearest_grid_point['lat index'], nearest_grid_point['lon index']]
+            var_point = self.var[:, self.nearest_grid_piont['lat index'], self.nearest_grid_piont['lon index']]
             
             #create dataframe with the var information along with the lon/lat and date
-            df = pd.DataFrame({'Date' : np.array(dtime[:]), 'Longitude' : nearest_grid_point['longitude'], \
-                               'Latitude' : nearest_grid_point['latitude'],\
-                                   variable : var_point})
+            df = pd.DataFrame({'Date' : np.array(dtime[:]), 'Longitude' : self.nearest_grid_piont['longitude'], \
+                               'Latitude' : self.nearest_grid_piont['latitude'],\
+                                   self.variable : var_point})
                 
             #write the output to csv files
             if file_type == 'Separate':
-                df.to_csv(output_directory + file[:-3] + variable + '.csv')
+                df.to_csv(output_directory + file[:-3] + self.variable + '.csv')
             
                 #concat the dataframe to produce one file
             else:
-                joint_df = pd.concat([joint_df, df], ignore_index=True)
+                self.joint_df = pd.concat([self.joint_df, df], ignore_index=True)
                 
         if file_type == 'Joint':
-            joint_df.to_csv(output_directory + 'Joint ' + variable + '.csv')
-                
+            self.joint_df.to_csv(output_directory + 'Joint ' + self.variable + '.csv')
+'''                
    
     
-   
+'''
     def load_bounded_region(self, output_directory, file_type = 'Joint'):
 
         #this function will load the data files and extract the values for the bounded region
@@ -153,8 +245,8 @@ class ERA5():
             #extract the bounded region
             #+1 is incldued in the slicing because the end point is not included. 
             #by adding 1 to the end point, the last coordinate data is also included
-            lon_reg = self.lon[self.vertex1['lon index']: self.vertex2['lon index']+1]
-            lat_reg = self.lat[self.vertex1['lat index']: self.vertex2['lat index']+1]
+            lon_reg = self.lon[self.vertex1['lon index'] : self.vertex2['lon index']+1]
+            lat_reg = self.lat[self.vertex1['lat index'] : self.vertex2['lat index']+1]
             swh_reg = swh[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
             mwd_reg = mwd[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
             mwp_reg = mwp[:, self.vertex1['lat index'] : self.vertex2['lat index'] + 1, self.vertex1['lon index'] : self.vertex2['lon index']+1]
@@ -223,7 +315,7 @@ class ERA5():
             joint_df_mwd.to_csv(output_directory + 'Joint_mwd.csv')
             joint_df_mwp.to_csv(output_directory + 'Joint_mwp.csv')
             
-    
+'''   
 '''        
         
 
