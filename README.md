@@ -39,6 +39,11 @@ If however, only a single point analyses is required, the library functions avai
 - load_coordinate_data() - this function requires the user to input the longitude and latitude of the point of interest. If the coordinates do not snap to a grid point, the function calculates the nearest neighour and uses the data for that particular point. 
 - It also informs the user of the distance between the specified point and the one being used. 
 
+For the single point data extraction, the code flows in a sequential model, a sample of which is given in the foler 'tests' under the name run_code.py:
+- First, the data files are loaded and unpacked into a 3D array
+- Then the user specifies the coordinate of interest and the function nearest_point is called which compares the coordinate with the data base. 
+- Finally, the 3D array and the nearest coordinates are passed on to the function extract_coordinate_data which provides the formatted files. 
+
 This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
 
 The structure of the code is kept basic for ease of editing. The three variables obtained from netcdf files - 'swh', 'mwd', 'mwp', are hard coded for now. It is important therefore that any input file must have these 3 variables. Future iterations will make the code more generalisable and will provide all class functionalities for any available key within the netcdf file.
