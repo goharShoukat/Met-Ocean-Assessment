@@ -24,9 +24,11 @@ class ERA5():
         #inputs
         #directory : string : provide path of the directory housing the data files
         self.directory = directory
+        self.files =np.sort(os.listdir(self.directory))[1:] #gets rid of the hidden file
+        #exVract information about the size of the array from the first file in the list
+        self.f = Dataset(self.directory + self.files[0], 'r')
         
-        
-    def load_files(self, variable):
+    def load_variable(self, variable):
         #code functioins for one variable at a time. 
         #input
         #variable : string : user defines the variable to study
@@ -37,25 +39,24 @@ class ERA5():
         #longitude : float : array of longitude
         #variable : float : array of the extracted data
         #lenght : int : length of each file for time to late split
+        #keys : list : list of the variables available within the  data files for the user to chose from
         self.variable = variable
         
-        self.files =np.sort(os.listdir(self.directory))[1:] #gets rid of the hidden file
-        #exVract information about the size of the array from the first file in the list
-        f = Dataset(self.directory + self.files[0], 'r')
-        unit = []
-        unit.append(f.variables[variable].units)
-        unit.append(f.variables['latitude'].units)
-        unit.append(f.variables['longitude'].units)
         
-        self.lon = np.array(f.variables['longitude'][:])
-        self.lat = np.array(f.variables['latitude'][:])
+        unit = []
+        unit.append(self.f.variables[variable].units)
+        unit.append(self.f.variables['latitude'].units)
+        unit.append(self.f.variables['longitude'].units)
+        
+        self.lon = np.array(self.f.variables['longitude'][:])
+        self.lat = np.array(self.f.variables['latitude'][:])
         
         #for the code to work, information from the first file needs to be extracted
         #from all other files, append the reults. 
         #lon and lat remain the same. variable data and time information chagnes
         
-        arr = np.array(f.variables[variable])
-        time = f.variables['time'] 
+        arr = np.array(self.f.variables[variable])
+        time = self.f.variables['time'] 
         dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
         
         #this variable is introduced to keep track of the time length of each file
@@ -274,15 +275,15 @@ class ERA5():
             
             #this function takes indices as its inputs
         indices = self.next_nearest_point(self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index'])
-            
+        
         for ind in indices:
             #first measure distance between neighouring cell and the point of interest
-            dist = self.calculate_dist(self.lat_user, self.lon_user, ind[0], ind[1])
+            dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
             print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
             df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
             print('Availability for this point is {} %'.format(avail))
-                
-    
+
+        
     
     
     
