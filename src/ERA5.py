@@ -105,14 +105,14 @@ class ERA5():
         
         availability = self.check_availability(self.df)
         
-        '''
+        
         if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
-            if availability < 100:
+            if (availability != 100):
                 user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?')
                 if user_input_nearest_point == 'yes':
-                    self.explore_more_points(availability)
-        '''   
-        return self.df
+                    self.explore_more_points()
+           
+        return self.df, availability
     
     def check_availability(self, df):
         #function to evaluate percentage of the times the data point has 
@@ -123,6 +123,7 @@ class ERA5():
         #df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
         availability = 100 - df[self.variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
         print('This variable has an availability of {} % at your specified/nearest coordinates'.format(availability))
+        return availability
     
     def nearest_point(self, lat_user, lon_user, radius = 1):
         #function to calculate the nearest data points
@@ -264,25 +265,22 @@ class ERA5():
         return indices
     
     
-    def explore_more_points(self, availability):
-        #input
-        #availability : float : value of availability passed down by function extract_coordinate_data() 
+    def explore_more_points(self):
+    
         #output
         #provides user option to explore data from surrounding neighouring grid points
         #explore data availability at each new data point
         #provides distance from each data point
-        
-        if availability < 100: 
             
             #this function takes indices as its inputs
-            indices = self.next_nearest_point(self.nearest_point_dict(['latitude index'], self.nearest_point_dict['longitude index']))
+        indices = self.next_nearest_point(self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index'])
             
-            for ind in indices:
-                #first measure distance between neighouring cell and the point of interest
-                dist = self.calculate_dist(self.lat_user, self.lon_user, ind[0], ind[1])
-                print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
-                df, avail = self.extract_coordinate_data(ind[0], ind[1])
-                print('Availability for this point is {} %'.format(avail))
+        for ind in indices:
+            #first measure distance between neighouring cell and the point of interest
+            dist = self.calculate_dist(self.lat_user, self.lon_user, ind[0], ind[1])
+            print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
+            df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
+            print('Availability for this point is {} %'.format(avail))
                 
     
     
