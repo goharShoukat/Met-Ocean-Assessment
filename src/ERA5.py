@@ -61,6 +61,7 @@ class ERA5():
         #this variable is introduced to keep track of the time length of each file
         #it will then be used to split the concatenated array in the cache
         sizeofarray = np.array(len(time))
+        
         if len(self.files) > 1:
         #in the event a single file is passed, the code will still function    
             for file in self.files[1:]:#since first file info extracted, start with second onwards
@@ -80,10 +81,23 @@ class ERA5():
         self.cache = {'time' : dtime, 'latitude' : self.lat, 'longitude' : self.lon, variable : arr, 'units' : unit, 'length of file' : sizeofarray}
         return self.cache
     
-    def extract_coordinate_data(self):
+    def extract_coordinate_data(self, lat_idx = False, lon_idx = False, neighouring_cells_request_active = False):
         #self.cache with all the coordinates data will be used for this function
-        lat_idx = self.nearest_point_dict['latitude index'][0][0]
-        lon_idx = self.nearest_point_dict['longitude index'][0][0]
+        #input
+        #lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function
+        #the index of the latitude and longitude need to be transmitted
+        #the actual longitude and latitude need not be mentioned
+        #neighouring_cells_request_active : boolean : this will be true only when we are exploring neighouring cells
+        #important to include this here because this function will be called in the function explore_more_points. 
+        #however, this function also has a call to this very function. 
+        #to prevent from getting stuck in an infinite loop, this argument is added. 
+        #output
+        #dataframe of the variable data along with the time and lan and lat information
+        #availability at this point
+        
+        if (lat_idx == False and lon_idx == False):
+            lat_idx = self.nearest_point_dict['latitude index']
+            lon_idx = self.nearest_point_dict['longitude index']
         
         array_ = self.cache[self.variable][:, lat_idx, lon_idx]
         date = self.cache['time'][:]
@@ -91,6 +105,13 @@ class ERA5():
         
         availability = self.check_availability(self.df)
         
+        '''
+        if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
+            if availability < 100:
+                user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?')
+                if user_input_nearest_point == 'yes':
+                    self.explore_more_points(availability)
+        '''   
         return self.df
     
     def check_availability(self, df):
@@ -103,17 +124,18 @@ class ERA5():
         availability = 100 - df[self.variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
         print('This variable has an availability of {} % at your specified/nearest coordinates'.format(availability))
     
-    def nearest_point(self, lat_user, lon_user):
+    def nearest_point(self, lat_user, lon_user, radius = 1):
         #function to calculate the nearest data points
         #lon_file : Array of float64 : Array passed on from the netcdf file
         #lat_file : Array of float64 : Array passed on from the netcdf file
         #lon_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
         #lat_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
-        
+        #radius : int : specifiy the number of neighouring cells to explore. can only be defined interms of the neighouring cells. not distance
         #Outputs
         #Dictionary data type with the indexes and the corresponding values 
         #of longitude and latitude from the original file
-        
+        self.lat_user = lat_user
+        self.lon_user = lon_user
         #checks if the specific user location matches grid points or not. 
         if not (lon_user in self.lon and lat_user in self.lat):
             idx_lon = np.abs(self.lon - lon_user).argmin()
@@ -123,6 +145,10 @@ class ERA5():
             idx_lon = np.where(self.lon == lon_user)
             idx_lat = np.where(self.lat == lat_user)
         
+        if type(idx_lon) == tuple:
+            idx_lon = idx_lon[0][0]
+            idx_lat = idx_lat[0][0]
+            
         self.nearest_point_dict = {'latitude index': idx_lat, 'longitude index': idx_lon, \
                        'latitude' : self.lat[idx_lat], 'longitude' : self.lon[idx_lon]}
         
@@ -179,21 +205,15 @@ class ERA5():
         else:
             print('Please choose between Joint or Separate save type for file output')
         
-
-    
-'''   
-    def next_nearest_point(self, array, row_idx, col_idx, radius):
+    def next_nearest_point(self, row_idx, col_idx):
         #if user inputs coordinates and availability for the data point comes out low
         #the next_nearest_point_availibility function will calculate 3 other nearest points
       
         #input
-        #array : 2D float64/int : data array to find the nearest neighours from
-        #slice the raw data file to include only one time stamp. 
-        #this step only needs access to neighouring 
+
         #row_idx : int : row index for the center point for which nearest neighour needs to be searched
         #col_idx : int : index for the center point for which nearest neighour needs to be searched
-        #radius : int : not the radius of search. raidus within the array. specify if the search radius needs to be for instance 2 element or 3 element in all directions. 
-       
+        
         #output
         #returns a list
         #index of the nearest neighours
@@ -201,6 +221,19 @@ class ERA5():
         
         #i iterates over row
         #j iterates over column
+        
+                
+        #array : 2D float64/int : data array to find the nearest neighours from
+        #slice the raw data file to include only one time stamp. 
+        #this step only needs access to neighouring 
+        array = self.cache[self.variable][0,:,:]
+        
+        
+        #radius : int : it will iteratively increase until a distance limit is crossed
+        #radius : int : specifies the radius in units of number of neighouring cells to check. 
+        
+        radius = 1
+
         
         above_i = row_idx + radius + 1 #defines the higher limt of row iterator
         if above_i > len(array) - 1: #takes into account the array length to avoid crossing index limits
@@ -222,21 +255,35 @@ class ERA5():
         indices = list()
         for i in range(below_i, above_i):
             for j in range(below_j, above_j):
-                indices.append(i, j) 
-        
-        
-    
-        
+                indices.append([i, j]) 
+                
+        #this also includes the original cell. delete the original cell index
+        indices.pop(indices.index([self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index']]))
+       
+         
         return indices
     
     
-'''    
-    
-    
-    
-    
-    
-    
+    def explore_more_points(self, availability):
+        #input
+        #availability : float : value of availability passed down by function extract_coordinate_data() 
+        #output
+        #provides user option to explore data from surrounding neighouring grid points
+        #explore data availability at each new data point
+        #provides distance from each data point
+        
+        if availability < 100: 
+            
+            #this function takes indices as its inputs
+            indices = self.next_nearest_point(self.nearest_point_dict(['latitude index'], self.nearest_point_dict['longitude index']))
+            
+            for ind in indices:
+                #first measure distance between neighouring cell and the point of interest
+                dist = self.calculate_dist(self.lat_user, self.lon_user, ind[0], ind[1])
+                print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
+                df, avail = self.extract_coordinate_data(ind[0], ind[1])
+                print('Availability for this point is {} %'.format(avail))
+                
     
     
     
