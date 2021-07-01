@@ -287,12 +287,7 @@ class ERA5():
                 df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
                 print('Availability for this point is {} %'.format(avail))
             
-            #select_new_coord = input('Do you wish to proceed with the initial selection or do you want to select a new coordinate?')
-        #if select_new_coord == 'yes': 
-        #        lat = float(input('Enter the Latitude: \n'))
-        #        lon = float(input('Enter the Longitude: \n'))
-        #        nearest = self.nearest_point(lat, lon)
-       # 
+
 
         
     
