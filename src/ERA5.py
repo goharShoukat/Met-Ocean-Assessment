@@ -110,7 +110,7 @@ class ERA5():
         if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
             if (availability != 100):
                 user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?')
-                if user_input_nearest_point == 'yes':
+                if user_input_nearest_point == 'yes' or user_input_nearest_point == 'y' or user_input_nearest_point == 'Yes' or user_input_nearest_point == 'Y':
                     self.explore_more_points()
            
         return self.df, availability
@@ -203,7 +203,7 @@ class ERA5():
                 else:
                     df2 = self.df[self.variable][self.cache['length of file'][i-1]:(self.cache['length of file'][i] + self.cache['length of file'][i-1])].reset_index(drop = True)
                 
-                df2.to_csv(output_direc + self.files[i][:-3] + '.csv')
+                df2.to_csv(output_direc + self.files[i][:-3] + '.csv', index_col=False)
         else:
             print('Please choose between Joint or Separate save type for file output')
         
