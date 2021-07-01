@@ -28,7 +28,7 @@ class ERA5():
         #exVract information about the size of the array from the first file in the list
         self.f = Dataset(self.directory + self.files[0], 'r')
         
-    def load_variable(self, variable):
+    def load_single_variable(self, variable):
         #code functioins for one variable at a time. 
         #input
         #variable : string : user defines the variable to study
@@ -96,15 +96,15 @@ class ERA5():
         #dataframe of the variable data along with the time and lan and lat information
         #availability at this point
         
-        if (lat_idx == False and lon_idx == False):
+        if lat_idx == False and lon_idx == False:
             lat_idx = self.nearest_point_dict['latitude index']
             lon_idx = self.nearest_point_dict['longitude index']
         
         array_ = self.cache[self.variable][:, lat_idx, lon_idx]
         date = self.cache['time'][:]
-        self.df = pd.DataFrame({'Date' :  date, 'Latitude' : self.lat[lat_idx], 'Longitude' : self.lon[lon_idx], self.variable : array_})
+        df = pd.DataFrame({'Date' :  date, 'Latitude' : self.lat[lat_idx], 'Longitude' : self.lon[lon_idx], self.variable : array_})
         
-        availability = self.check_availability(self.df)
+        availability = self.check_availability(df)
         
         
         if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
@@ -113,7 +113,7 @@ class ERA5():
                 if user_input_nearest_point == 'yes' or user_input_nearest_point == 'y' or user_input_nearest_point == 'Yes' or user_input_nearest_point == 'Y':
                     self.explore_more_points()
            
-        return self.df, availability
+        return df, availability
     
     def check_availability(self, df):
         #function to evaluate percentage of the times the data point has 
@@ -175,7 +175,7 @@ class ERA5():
         return haversine(user_input, nearest_point) #returns value in km
     
     
-    def write_coordinate_data(self, output_direc, save = 'Joint'):
+    def write_coordinate_data(self, df, output_direc, save = 'Joint'):
         #function to write the extracted data ponts to a csv
         #input
         #output_direc : string : location to save the output files
@@ -189,12 +189,12 @@ class ERA5():
             os.mkdir(output_direc)
         
         #before writing the file, add the unit to the dataframe
-        self.df = self.df.rename(columns={self.variable : (self.variable + ' ({})'.format(self.cache['units'][0])),\
+        df = df.rename(columns={self.variable : (self.variable + ' ({})'.format(self.cache['units'][0])),\
                                           'Latitude' : ('Latitude' + ' ({})'.format(self.cache['units'][1])),\
                                         'Longitude' : ('Longitude' + ' ({})'.format(self.cache['units'][2]))})
                                  
         if save == 'Joint':
-            self.df.to_csv(output_direc + self.variable + '.csv')
+            df.to_csv(output_direc + self.variable + '.csv')
         
         elif save == 'Separate':
             for i in range(len(self.cache['length of file'])):
@@ -260,7 +260,8 @@ class ERA5():
                 indices.append([i, j]) 
                 
         #this also includes the original cell. delete the original cell index
-        indices.pop(indices.index([self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index']]))
+        #if [row_idx, col_idx] in indices:
+         #   indices.pop(indices.index([self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index']]))
        
          
         return indices
@@ -272,16 +273,26 @@ class ERA5():
         #provides user option to explore data from surrounding neighouring grid points
         #explore data availability at each new data point
         #provides distance from each data point
+        #additionally it allows switching coordinates and recalls the extract_coordinate_data to match the new selection
             
-            #this function takes indices as its inputs
         indices = self.next_nearest_point(self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index'])
         
         for ind in indices:
-            #first measure distance between neighouring cell and the point of interest
-            dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
-            print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
-            df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
-            print('Availability for this point is {} %'.format(avail))
+            if self.lat[self.nearest_point_dict['latitude index']] == self.lat[ind[0]] and self.lon[self.nearest_point_dict['longitude index']] == self.lon[ind[1]]:
+                pass
+            else:
+                #first measure distance between neighouring cell and the point of interest
+                dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
+                print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
+                df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
+                print('Availability for this point is {} %'.format(avail))
+            
+            #select_new_coord = input('Do you wish to proceed with the initial selection or do you want to select a new coordinate?')
+        #if select_new_coord == 'yes': 
+        #        lat = float(input('Enter the Latitude: \n'))
+        #        lon = float(input('Enter the Longitude: \n'))
+        #        nearest = self.nearest_point(lat, lon)
+       # 
 
         
     
