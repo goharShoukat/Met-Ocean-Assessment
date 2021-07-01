@@ -24,14 +24,14 @@ class ERA5():
         #inputs
         #directory : string : provide path of the directory housing the data files
         self.directory = directory
-        self.files =np.sort(os.listdir(self.directory))[1:] #gets rid of the hidden file
+        self.files =np.sort(os.listdir(self.directory))[1:] #gets rid of the hidden file. this will differ for windows
         #exVract information about the size of the array from the first file in the list
         self.f = Dataset(self.directory + self.files[0], 'r')
         
-    def load_single_variable(self, variable):
+    def load_variable(self, variable_list):
         #code functioins for one variable at a time. 
         #input
-        #variable : string : user defines the variable to study
+        #variable_list : list of string : user defines the variables to study
         #output
         #a dictionary
         #time : str : contains the array of the time for all time
@@ -40,55 +40,76 @@ class ERA5():
         #variable : float : array of the extracted data
         #lenght : int : length of each file for time to late split
         #keys : list : list of the variables available within the  data files for the user to chose from
-        self.variable = variable
-        
-        
-        unit = []
-        unit.append(self.f.variables[variable].units)
-        unit.append(self.f.variables['latitude'].units)
-        unit.append(self.f.variables['longitude'].units)
-        
+        self.variable_list = variable_list
         self.lon = np.array(self.f.variables['longitude'][:])
         self.lat = np.array(self.f.variables['latitude'][:])
+        time = self.f.variables['time'] 
+        dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
+        sizeofarray = np.array(len(time))
+        #keys= list(f.variables.keys())
         
         #for the code to work, information from the first file needs to be extracted
         #from all other files, append the reults. 
         #lon and lat remain the same. variable data and time information chagnes
+        self.cache = {}
+        #unit = pd.DataFrame()
+        #unit.append(self.f.variables['latitude'].units)
+        #unit.append(self.f.variables['longitude'].units)
+            
+        #creates a dictionary with all the variables
+        for variable in variable_list:
+            self.variable = variable
+            
+            
+            #unit.append(self.f.variables[variable].units)
+            
+            
+        #for the code to work, information from the first file needs to be extracted
+        #from all other files, append the reults. 
+        #lon and lat remain the same. variable data and time information chagnes
         
-        arr = np.array(self.f.variables[variable])
-        time = self.f.variables['time'] 
-        dtime = num2date(time[:], time.units) #hours since 1900-1-1 00:00:00"
-        
-        #this variable is introduced to keep track of the time length of each file
-        #it will then be used to split the concatenated array in the cache
-        sizeofarray = np.array(len(time))
-        
+            arr = np.array(self.f.variables[variable])
+            arr[arr == -32767] = None   #important step as netcdf variables created with fill_value of -32767
+            arr = np.around(arr, decimals=2)
+            self.cache[variable] = arr
+            
+            #
+            if len(self.files) > 1:
+                for file in self.files[1:]:
+                    f2 = Dataset(self.directory + file, 'r')
+                    var = np.array(f2.variables[variable])
+                    var[var == -32767] = None   #important step as netcdf variables created with fill_value of -32767
+                    var = np.around(var, decimals=2)
+                    self.cache[variable] = np.concatenate([self.cache[variable], var], axis = 0) 
+
+    
+    
+    #    time and length arrays are fixed here
         if len(self.files) > 1:
-        #in the event a single file is passed, the code will still function    
-            for file in self.files[1:]:#since first file info extracted, start with second onwards
-                dset = Dataset(self.directory + file, 'r') 
+                
+            for file in self.files[1:]:
+                dset = Dataset(self.directory + file, 'r')
                 time2 = dset.variables['time']
                 dtime2 = num2date(time2[:], time2.units) #hours since 1900-1-1 00:00:00"
-                dtime = np.concatenate([dtime, dtime2], axis = 0) #append with dtime from first file
-                
-                var = np.array(dset.variables[variable]) #extract values for current file
-                arr = np.concatenate([arr, var], axis = 0)#merge with the first file data
-                
+                dtime = np.concatenate([dtime, dtime2], axis = 0)
                 l = len(dtime2)
                 sizeofarray = np.append(sizeofarray, l)
-                
-        arr[arr == -32767] = None #important step as netcdf variables created with fill_value of -32767
-        arr = np.around(arr, decimals=2) #rounds off the values to a 
-        self.cache = {'time' : dtime, 'latitude' : self.lat, 'longitude' : self.lon, variable : arr, 'units' : unit, 'length of file' : sizeofarray}
+            
+        self.cache['time'] = dtime
+        self.cache['longitude'] = self.lon
+        self.cache['latitude'] = self.lat
+        self.cache['length of file'] = sizeofarray
+      
         return self.cache
     
-    def extract_coordinate_data(self, lat_idx = False, lon_idx = False, neighouring_cells_request_active = False):
+    def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False, neighouring_cells_request_active = False):
         #self.cache with all the coordinates data will be used for this function
         #input
         #lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function
         #the index of the latitude and longitude need to be transmitted
         #the actual longitude and latitude need not be mentioned
         #neighouring_cells_request_active : boolean : this will be true only when we are exploring neighouring cells
+        #the neighouring_cells_request_active : remain false when multiple variables are being querried
         #important to include this here because this function will be called in the function explore_more_points. 
         #however, this function also has a call to this very function. 
         #to prevent from getting stuck in an infinite loop, this argument is added. 
@@ -100,11 +121,12 @@ class ERA5():
             lat_idx = self.nearest_point_dict['latitude index']
             lon_idx = self.nearest_point_dict['longitude index']
         
-        array_ = self.cache[self.variable][:, lat_idx, lon_idx]
-        date = self.cache['time'][:]
-        df = pd.DataFrame({'Date' :  date, 'Latitude' : self.lat[lat_idx], 'Longitude' : self.lon[lon_idx], self.variable : array_})
         
-        availability = self.check_availability(df)
+        array_ = self.cache[variable][:, lat_idx, lon_idx]
+        date = self.cache['time'][:]
+        df = pd.DataFrame({'Date' :  date, 'Latitude' : self.lat[lat_idx], 'Longitude' : self.lon[lon_idx], variable : array_})
+        
+        availability = self.check_availability(df, variable)
         
         
         if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
@@ -115,14 +137,14 @@ class ERA5():
            
         return df, availability
     
-    def check_availability(self, df):
+    def check_availability(self, df, variable):
         #function to evaluate percentage of the times the data point has 
         #availability of data
         #function can only be used if file_type == 'Joint'
         #this function sums up the number of data points that are empty in the series and returns a percentage
         #input
         #df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
-        availability = 100 - df[self.variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
+        availability = 100 - df[variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
         print('This variable has an availability of {} % at your specified/nearest coordinates'.format(availability))
         return availability
     
@@ -175,44 +197,37 @@ class ERA5():
         return haversine(user_input, nearest_point) #returns value in km
     
     
-    def write_coordinate_data(self, df, output_direc, save = 'Joint'):
+    def write_coordinate_data(self, df, variable, output_direc):
         #function to write the extracted data ponts to a csv
         #input
         #output_direc : string : location to save the output files
         #output_direc should end with a slash at the end
         #if the folder doens exist, it will create folder
-        #save : string : Joint or Separate
-        #Joint creates a single data file
-        #Separate creates one file per input file. Default is joint
+
         
         if not os.path.isdir(output_direc):
             os.mkdir(output_direc)
         
         #before writing the file, add the unit to the dataframe
-        df = df.rename(columns={self.variable : (self.variable + ' ({})'.format(self.cache['units'][0])),\
-                                          'Latitude' : ('Latitude' + ' ({})'.format(self.cache['units'][1])),\
-                                        'Longitude' : ('Longitude' + ' ({})'.format(self.cache['units'][2]))})
+        #df = df.rename(columns={self.variable : (self.variable + ' ({})'.format(self.cache['units'][0])),\
+         #                                 'Latitude' : ('Latitude' + ' ({})'.format(self.cache['units'][1])),\
+          #                              'Longitude' : ('Longitude' + ' ({})'.format(self.cache['units'][2]))})
                                  
-        if save == 'Joint':
-            df.to_csv(output_direc + self.variable + '.csv')
         
-        elif save == 'Separate':
-            for i in range(len(self.cache['length of file'])):
-                if i == 0:
-                    df2 = self.df[self.variable][0:self.cache['length of file'][0]].reset_index(drop = True)
-                else:
-                    df2 = self.df[self.variable][self.cache['length of file'][i-1]:(self.cache['length of file'][i] + self.cache['length of file'][i-1])].reset_index(drop = True)
-                
-                df2.to_csv(output_direc + self.files[i][:-3] + '.csv', index_col=False)
+        
+        if len(variable) == 1:
+            df.to_csv(output_direc + variable[0] + '.csv')
         else:
-            print('Please choose between Joint or Separate save type for file output')
+            df.to_csv(output_direc + 'data_file' + '.csv')
+            
+        
         
     def next_nearest_point(self, row_idx, col_idx):
         #if user inputs coordinates and availability for the data point comes out low
         #the next_nearest_point_availibility function will calculate 3 other nearest points
       
         #input
-
+        #variable : string : variable from the list of variables available within the data file
         #row_idx : int : row index for the center point for which nearest neighour needs to be searched
         #col_idx : int : index for the center point for which nearest neighour needs to be searched
         
@@ -268,7 +283,8 @@ class ERA5():
     
     
     def explore_more_points(self):
-    
+        #input
+        #variable : string : for which the calculation is being carried out
         #output
         #provides user option to explore data from surrounding neighouring grid points
         #explore data availability at each new data point
@@ -281,10 +297,11 @@ class ERA5():
             if self.lat[self.nearest_point_dict['latitude index']] == self.lat[ind[0]] and self.lon[self.nearest_point_dict['longitude index']] == self.lon[ind[1]]:
                 pass
             else:
+                print('Wave Data has similar coverage and availability. Therefore, we will provide availability details for one of the variables.')
                 #first measure distance between neighouring cell and the point of interest
                 dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
                 print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
-                df, avail = self.extract_coordinate_data(ind[0], ind[1], neighouring_cells_request_active=True)
+                df, avail = self.extract_coordinate_data(self.variable,ind[0], ind[1], neighouring_cells_request_active=True)
                 print('Availability for this point is {} %'.format(avail))
             
 
