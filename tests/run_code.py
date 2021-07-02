@@ -67,16 +67,7 @@ def run_script():
     nearest = x.nearest_point(lat, lon)
     
     df, avail = df_generator(x, variable, nearest)
-    '''
-    if len(variable) == 1:    
-        df, avail = x.extract_coordinate_data(variable[0], nearest['latitude index'], nearest['longitude index'])
-    else:
-        #extract multiple variable information
-        df, _ = x.extract_coordinate_data(variable[0])
-        for var in variable[1:]:
-            df2, _ = x.extract_coordinate_data(var, nearest['latitude index'], nearest['longitude index'])
-            df[var] = df2[var]
-    '''
+
         
     if_save = input('Do you wish to save the data for your selected coordinate? \n')
     if if_save == 'yes':

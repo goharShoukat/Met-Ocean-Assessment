@@ -145,7 +145,7 @@ class ERA5():
         #input
         #df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
         availability = 100 - df[variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
-        print('This variable has an availability of {} % at your specified/nearest coordinates'.format(availability))
+        print('{} has an availability of {} % at your specified/nearest coordinates'.format(variable,availability))
         return availability
     
     def nearest_point(self, lat_user, lon_user, radius = 1):
@@ -292,17 +292,17 @@ class ERA5():
         #additionally it allows switching coordinates and recalls the extract_coordinate_data to match the new selection
             
         indices = self.next_nearest_point(self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index'])
-        
+        print('Wave Data has similar coverage and availability. Therefore, we will provide availability details for one of the variables.')
+                
         for ind in indices:
             if self.lat[self.nearest_point_dict['latitude index']] == self.lat[ind[0]] and self.lon[self.nearest_point_dict['longitude index']] == self.lon[ind[1]]:
                 pass
             else:
-                print('Wave Data has similar coverage and availability. Therefore, we will provide availability details for one of the variables.')
                 #first measure distance between neighouring cell and the point of interest
                 dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
                 print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
                 df, avail = self.extract_coordinate_data(self.variable,ind[0], ind[1], neighouring_cells_request_active=True)
-                print('Availability for this point is {} %'.format(avail))
+                #print('Availability for this point is {} %'.format(avail))
             
 
 
