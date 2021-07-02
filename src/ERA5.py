@@ -52,13 +52,15 @@ class ERA5():
         #from all other files, append the reults. 
         #lon and lat remain the same. variable data and time information chagnes
         self.cache = {}
-        #unit = pd.DataFrame()
-        #unit.append(self.f.variables['latitude'].units)
-        #unit.append(self.f.variables['longitude'].units)
-            
+        
+        #extract variable unit information
+        unit = pd.DataFrame(columns = variable_list, index = [0])
+
         #creates a dictionary with all the variables
         for variable in variable_list:
             self.variable = variable
+            unit.iloc[0][variable] = self.f.variables[variable].units
+
             
             
             #unit.append(self.f.variables[variable].units)
@@ -99,7 +101,7 @@ class ERA5():
         self.cache['longitude'] = self.lon
         self.cache['latitude'] = self.lat
         self.cache['length of file'] = sizeofarray
-      
+        self.cache['Units'] = unit
         return self.cache
     
     def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False, neighouring_cells_request_active = False):
@@ -200,10 +202,15 @@ class ERA5():
     def write_coordinate_data(self, df, variable, output_direc):
         #function to write the extracted data ponts to a csv
         #input
+        #df : DataFrame : extracted coordinate data for one or all variables
+        #varilable : list : list of all variables
         #output_direc : string : location to save the output files
         #output_direc should end with a slash at the end
         #if the folder doens exist, it will create folder
-
+        
+        for var in variable:
+            df = df.rename(columns = {var : (var + ' ({})'.format(self.cache['Units'][var][0]))})        
+ 
         
         if not os.path.isdir(output_direc):
             os.mkdir(output_direc)
