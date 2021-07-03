@@ -31,7 +31,7 @@ class ERA5():
     def load_variable(self, variable_list):
         #code functioins for one variable at a time. 
         #input
-        #variable_list : list of string : user defines the variables to study
+        #variable_list : numpy.ndarray : user defines the variables to study
         #output
         #a dictionary
         #time : str : contains the array of the time for all time
@@ -54,7 +54,12 @@ class ERA5():
         self.cache = {}
         
         #extract variable unit information
-        unit = pd.DataFrame(columns = variable_list, index = [0])
+        unit_list = variable_list
+        unit_list = np.append(unit_list, ['latitude', 'longitude'])
+        unit = pd.DataFrame(columns = unit_list, index = [0])
+        unit.iloc[0]['latitude'] = self.f.variables['latitude'].units #after thought. also need to extract units for latitude and longitude. however, we can not alter the variable_list, otherwise it will break the code. 
+        unit.iloc[0]['longitude'] = self.f.variables['longitude'].units
+
 
         #creates a dictionary with all the variables
         for variable in variable_list:
@@ -126,7 +131,7 @@ class ERA5():
         
         array_ = self.cache[variable][:, lat_idx, lon_idx]
         date = self.cache['time'][:]
-        df = pd.DataFrame({'Date' :  date, 'Latitude' : self.lat[lat_idx], 'Longitude' : self.lon[lon_idx], variable : array_})
+        df = pd.DataFrame({'Date' :  date, 'latitude' : self.lat[lat_idx], 'longitude' : self.lon[lon_idx], variable : array_})
         
         availability = self.check_availability(df, variable)
         
@@ -203,13 +208,18 @@ class ERA5():
         #function to write the extracted data ponts to a csv
         #input
         #df : DataFrame : extracted coordinate data for one or all variables
-        #varilable : list : list of all variables
+        #varilable : np.ndarray : array of all variables
         #output_direc : string : location to save the output files
         #output_direc should end with a slash at the end
         #if the folder doens exist, it will create folder
         
+        #extract units before writing it in the data file
+        #for the purpose of plots, latitude and longitude will also be added to the list of variables. all variables witll have their units attached. 
+        variable = np.append(variable, ['latitude', 'longitude'])
+      
+        
         for var in variable:
-            df = df.rename(columns = {var : (var + ' ({})'.format(self.cache['Units'][var][0]))})        
+            df = df.rename(columns = {var : (var + ' ({})'.format(self.cache['Units'].iloc[0][var]))})        
  
         
         if not os.path.isdir(output_direc):
