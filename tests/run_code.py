@@ -15,6 +15,7 @@ import time
 import sys
 sys.path.append('/Users/goharshoukat/Documents/GitHub/Met-Ocean-Assessment/src/')
 from ERA5 import ERA5
+'''
 def df_generator(era5_inst, variable, nearest_dict):
     #inputs
     #instance of the declared era5 class : class ERA%
@@ -28,13 +29,15 @@ def df_generator(era5_inst, variable, nearest_dict):
         df, avail = era5_inst.extract_coordinate_data(variable[0], nearest_dict['latitude index'], nearest_dict['longitude index'])
     else:
         #extract multiple variable information
-        df, avail = era5_inst.extract_coordinate_data(variable[0])
-        for var in variable[1:]:
-            df2, _ = era5_inst.extract_coordinate_data(var, nearest_dict['latitude index'], nearest_dict['longitude index'])
+        df = pd.DataFrame()
+        availability = []
+        for var in variable[0:]:
+            df2, avail = era5_inst.extract_coordinate_data(var, nearest_dict['latitude index'], nearest_dict['longitude index'], False)
             df[var] = df2[var]
+            availability = np.append(availability, avail)
     
-    return df, avail
-
+    return df, availability
+'''
 def run_script():
     directory = input('Enter the directory of the data folder: \n')
     #directory = '/Users/goharshoukat/Documents/GitHub/Met-Ocean-Assessment/some_data/'
@@ -66,7 +69,7 @@ def run_script():
     #confirms the nearest point
     nearest = x.nearest_point(lat, lon)
     
-    df, avail = df_generator(x, variable, nearest)
+    df, avail = x.df_generator(variable)
 
         
     if_save = input('Do you wish to save the data for your selected coordinate? \n')
@@ -76,7 +79,7 @@ def run_script():
             print('Successfully Saved \n\n')
 
     
-    if avail != 100:
+    if avail[0] != 100:
         #if availability of selected point is less than 100, user will be given an optino to select a new coordinate. 
         select_new_coord = input('Do you want to select a new coordinate because your previous selection had low availability?')
    
@@ -84,27 +87,14 @@ def run_script():
                 lat = float(input('Enter the Latitude: \n'))
                 lon = float(input('Enter the Longitude: \n'))
                 nearest2 = x.nearest_point(lat, lon)
-                df2, avail2 = df_generator(x, variable, nearest2)
+                df2, avail2 = x.df_generator(variable)
                  
                 if_save = input('Do you wish to save the data for this coordinate? \n')
                 if if_save == 'yes':
                     out_direc = input('Please provide directory to save the data \n')
                     x.write_coordinate_data(df2, variable, out_direc)
                     print('Successfully Saved \n\n')
-                    
 
-
-        
-    
-    
-    
-    
-    ''' 
-    if_more_variables = input('Do you wish to include other variables within the output file?')
-    if if_more_variables:
-        pass
-    '''
-    
     
 while True:
     run_script()

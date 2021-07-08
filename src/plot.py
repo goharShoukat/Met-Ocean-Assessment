@@ -31,7 +31,7 @@ df = df.rename(columns = {'latitude (degrees_north)' : 'latitude', 'longitude (d
 df['Date'] = pd.to_datetime(df['Date'])
 #strip the time from the date column
 df['new_date']= df['Date'].dt.strftime('%Y-%m-%d')
-
+availability = 100 - df['swh (m)'].isnull().sum()/len(df) * 100 
 left = min(df['Date'])
 right = max((df['Date']))
 
@@ -56,7 +56,9 @@ ax.grid(b = True, which = 'both', linestyle= '--')
 
 #plt.text(0.5, 0.5, 'matplotlib', ha='right', va='top', transform=ax.transAxes)
 plt.text(0.87, 0.87, 'Average \n{:.2f}'.format(np.mean(df['swh (m)'])), fontsize=9, transform=plt.gcf().transFigure)
-plt.text(0.93, 0.87, 'Availibility \n{:.2f}'.format(np.min(df['swh (m)'])), fontsize=9, transform=plt.gcf().transFigure)
+plt.text(0.93, 0.87, 'Availibility \n{:.2f}'.format(availability), fontsize=9, transform=plt.gcf().transFigure)
 
 plt.text(0.87, 0.80, 'Minimum \n{:.2f}'.format(np.min(df['swh (m)'])), fontsize=9, transform=plt.gcf().transFigure)
 plt.text(0.93, 0.80, 'Maximum \n{:.2f}'.format(np.max(df['swh (m)'])), fontsize=9, transform=plt.gcf().transFigure)
+plt.text(0.87, 0.73, 'Std \n{:.2f}'.format(np.std(df['swh (m)'])), fontsize=9, transform=plt.gcf().transFigure)
+plt.savefig('Plots/Time Series.png', dpi = 300)

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from netCDF4 import Dataset, num2date
 import numpy as np
 import cartopy.crs as ccrs
-from datetime import datetime, timedelta  #libraries required to convert the time column of netcdf4
+from datetime import datetime  #libraries required to convert the time column of netcdf4
 import pandas as pd
 from pathlib import Path
 from haversine import haversine
@@ -109,9 +109,10 @@ class ERA5():
         self.cache['Units'] = unit
         return self.cache
     
-    def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False, neighouring_cells_request_active = False):
+    def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False):
         #self.cache with all the coordinates data will be used for this function
         #input
+        #variables : string : variable for which the data has to be extracted
         #lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function
         #the index of the latitude and longitude need to be transmitted
         #the actual longitude and latitude need not be mentioned
@@ -135,13 +136,13 @@ class ERA5():
         
         availability = self.check_availability(df, variable)
         
-        
+        '''
         if neighouring_cells_request_active == False:#this false will ensure that only the first time the function is called, this optin will be provided to the user. Once the funtion is called from within the function explore_more_points, this will not get activated and prevent the infinite loop 
             if (availability != 100):
-                user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?')
+                user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?\n')
                 if user_input_nearest_point == 'yes' or user_input_nearest_point == 'y' or user_input_nearest_point == 'Yes' or user_input_nearest_point == 'Y':
                     self.explore_more_points()
-           
+        '''
         return df, availability
     
     def check_availability(self, df, variable):
@@ -152,7 +153,7 @@ class ERA5():
         #input
         #df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
         availability = 100 - df[variable].isnull().sum()/len(df) * 100 #calculate the percentage of data availabiliity
-        print('{} has an availability of {} % at your specified/nearest coordinates'.format(variable,availability))
+        print('{} has an availability of {} % at your specified/nearest coordinates\n'.format(variable,availability))
         return availability
     
     def nearest_point(self, lat_user, lon_user, radius = 1):
@@ -186,7 +187,7 @@ class ERA5():
         #calculate the nearest distance
         if not (lon_user in self.lon and lat_user in self.lat):
            dist = self.calculate_dist(lat_user, lon_user, self.nearest_point_dict['latitude'], self.nearest_point_dict['longitude'])
-           print('The distance between your specified coordinate and the nearest grid point is {:.2f} Km'.format(dist))
+           print('The distance between your specified coordinate and the nearest grid point is {:.2f} Km\n'.format(dist))
         
         return self.nearest_point_dict
         
@@ -225,17 +226,9 @@ class ERA5():
         if not os.path.isdir(output_direc):
             os.mkdir(output_direc)
         
-        #before writing the file, add the unit to the dataframe
-        #df = df.rename(columns={self.variable : (self.variable + ' ({})'.format(self.cache['units'][0])),\
-         #                                 'Latitude' : ('Latitude' + ' ({})'.format(self.cache['units'][1])),\
-          #                              'Longitude' : ('Longitude' + ' ({})'.format(self.cache['units'][2]))})
-                                 
-        
-        
-        if len(variable) == 1:
-            df.to_csv(output_direc + variable[0] + '.csv')
-        else:
-            df.to_csv(output_direc + 'data_file' + '.csv')
+        date = datetime.now().strftime("%m_%d-%I_%M_%p")
+        file_name = output_direc + date
+        df.to_csv(file_name + '.csv', index = False)
             
         
         
@@ -299,9 +292,9 @@ class ERA5():
         return indices
     
     
-    def explore_more_points(self):
+    def explore_more_points(self, variable):
         #input
-        #variable : string : for which the calculation is being carried out
+        #variable : array of string : for which the calculation is being carried out
         #output
         #provides user option to explore data from surrounding neighouring grid points
         #explore data availability at each new data point
@@ -309,25 +302,52 @@ class ERA5():
         #additionally it allows switching coordinates and recalls the extract_coordinate_data to match the new selection
             
         indices = self.next_nearest_point(self.nearest_point_dict['latitude index'], self.nearest_point_dict['longitude index'])
-        print('Wave Data has similar coverage and availability. Therefore, we will provide availability details for one of the variables.')
                 
         for ind in indices:
-            if self.lat[self.nearest_point_dict['latitude index']] == self.lat[ind[0]] and self.lon[self.nearest_point_dict['longitude index']] == self.lon[ind[1]]:
-                pass
-            else:
-                #first measure distance between neighouring cell and the point of interest
-                dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
-                print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
-                df, avail = self.extract_coordinate_data(self.variable,ind[0], ind[1], neighouring_cells_request_active=True)
-                #print('Availability for this point is {} %'.format(avail))
-            
+            for var in variable:
+                if self.lat[self.nearest_point_dict['latitude index']] == self.lat[ind[0]] and self.lon[self.nearest_point_dict['longitude index']] == self.lon[ind[1]]:
+                        pass
+                else:
+                    dist = self.calculate_dist(self.lat_user, self.lon_user, self.lat[ind[0]], self.lon[ind[1]])
+                    print ('Distance between your specified point and the neighouring data point Lat: {}, Lon: {} is {:.2f} km'.format(self.lat[ind[0]], self.lon[ind[1]], dist))
+                    df, _ = self.extract_coordinate_data(var, ind[0], ind[1])
 
 
+
+    def df_generator(self, variable, research_more_points = False):
+        #function to generate a combined dataframe of all the variables within the 
+        #variables supplied by the user. It will also check the availability and 
+        #call the necessary functions 
+    
+        #input
+        #variable : array of string : contains all the variables for which 
+        #research_more_points : dictionary of nearest point
         
-    
-    
-    
-    
+        #output
+        #combined_df : pandas.DataFrame : cotaining Date, lat/lon, variables
+        #availability : np.array : array of the availibitly fo all variables
+        availability = []
+        self.combined_df= pd.DataFrame()
+        for var in variable:
+            df, avail= self.extract_coordinate_data(var)
+            self.combined_df['Date'] = df['Date']
+            self.combined_df['latitude'] = df['latitude']
+            self.combined_df['longitude'] = df['longitude']
+            self.combined_df[var] = df[var]
+            availability = np.append(availability, avail)
+        
+        
+        #allow us to identify which variable has low availability
+        avail_check = availability != 100
+        if True in avail_check:
+            print('The following variables have a low availability at the nearest/specified coordinate {}\n'.format(variable[avail_check]))
+            user_input_nearest_point = input('This point has low availability. Do you wish to explore surrounding grid points?')
+            if user_input_nearest_point == 'yes' or user_input_nearest_point == 'y' or user_input_nearest_point == 'Yes' or user_input_nearest_point == 'Y':
+                self.explore_more_points(variable)
+           
+        return self.combined_df, availability
+        
+        
     
     
     
