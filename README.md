@@ -1,11 +1,10 @@
 # Met Ocean Assessment 
 This tool is designed to automate the process of met ocean assessments for a site's energy resource assessment and to provide a starting point for a more detailed analyses. The user can clone the repository using the following command from the terminal: 
-
 git clone https://github.com/goharShoukat/Met-Ocean-Assessment.git
+The above command can work if git is installed. This is the recommended cloning methodology as the users can get very conveniently download any updates to the software. The other optino is to manually clone the repository through github itself. On the top right corner, there is an option to clone the repository. Any updates to the software will have to be downloaded manually as well which can be quite cumbersome. 
 
 Occasionaly, use the command from your terminal after entering the folder where the repositor was cloned:
-git pull
-
+git pull.
 This automatically updates the library and provides all new functionalities that the contributors have included. For the two commands stated above to work with the terminal, 'git' has to be installed in your system. If it isn't, then manually clone the repository from Github. This however means that every time you wish to sync the repository with the source code, a manual download will be required which can lead to loss of old data files.  
 
 This tool is designed to run with Python 3.7 and above. The following additional  libraries are needed to successfully run this program:
@@ -28,25 +27,25 @@ This is the first release and a test bed. This version will house all the script
 - Directory housing the ERA5 datasets
 
 The code provides multiple functionalities to the user:
-- The user can study a bounded region.
 - Evaluate data at a single coordinate.
-The ERA5 class has two different paths through which the class can be accessed. If the user wishes to proceed with the bounded region, the following set of functions can be used:
-- bounded_region() - this function takes the two opposite vertices. The bounded region can only be in the shape of rectange
-- load_bounded_region() - this function then extracts the information about the three variables - swh, mwp and mwd. For now this is hardcoded.-
+- Extract information about a single variable or multiple variables. 
+- Specify a coordinate of interest and the software will check if the point specified is present within the dataset. If not, it will automatically snap to the nearest grid point. 
+- Provides information about the distance between the nearest grid point and the point specified by the user. 
+- Provides information about individual availability of each variable the user has chosen.
+- If the availability is low, the software provides option to look at grid points further apart and then alter the coordinate the user wants to extract information for. 
 
-
-If however, only a single point analyses is required, the library functions available are much more powerful, versatile and greater in number: 
-- load_coordinate_data() - this function requires the user to input the longitude and latitude of the point of interest. If the coordinates do not snap to a grid point, the function calculates the nearest neighour and uses the data for that particular point. 
-- It also informs the user of the distance between the specified point and the one being used. 
 
 For the single point data extraction, the code flows in a sequential model, a sample of which is given in the foler 'tests' under the name run_code.py:
 - First, the data files are loaded and unpacked into a 3D array
 - Then the user specifies the coordinate of interest and the function nearest_point is called which compares the coordinate with the data base. 
 - Finally, the 3D array and the nearest coordinates are passed on to the function extract_coordinate_data which provides the formatted files. 
 
+### Functions 
+Under this section, we will cover each function available within the ERA5 class, specify the inputs and outputs for them and the datatypes. 
+
+
 This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
 
-The structure of the code is kept basic for ease of editing. The three variables obtained from netcdf files - 'swh', 'mwd', 'mwp', are hard coded for now. It is important therefore that any input file must have these 3 variables. Future iterations will make the code more generalisable and will provide all class functionalities for any available key within the netcdf file.
 
 ### Warnings:
 It is also important to note that the data files should all be homogenous. That is, they should have the same spatial resolution and have the same latitudnal and longitudnal coverage. The code can not adjust to varying coverage across data files.  
