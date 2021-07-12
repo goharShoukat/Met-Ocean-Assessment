@@ -18,6 +18,7 @@ The other libraries required come preinstalled with your Python installation. We
 - $ pip install cartopy
 - $ pip install pyqt5 
 - $ pip install haversine
+
 Please be warned that downloading and installing libraries from Spyder's terminal may break the dependencies of your pre-existing libraries that come with Anaconda. Please open an issue and let us know if this is the case. 
 
 The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
@@ -33,18 +34,33 @@ The code provides multiple functionalities to the user:
 - Provides information about the distance between the nearest grid point and the point specified by the user. 
 - Provides information about individual availability of each variable the user has chosen.
 - If the availability is low, the software provides option to look at grid points further apart and then alter the coordinate the user wants to extract information for. 
-
+- Provides the user with the option to chose between all the variables contained within the data files.
+- If a critical variable (hard coded and can be changed) is missing, the software throws a warning. These critical variables are the ones that will be useful in generating the plots which will follow this software. 
 
 For the single point data extraction, the code flows in a sequential model, a sample of which is given in the foler 'tests' under the name run_code.py:
 - First, the data files are loaded and unpacked into a 3D array
 - Then the user specifies the coordinate of interest and the function nearest_point is called which compares the coordinate with the data base. 
 - Finally, the 3D array and the nearest coordinates are passed on to the function extract_coordinate_data which provides the formatted files. 
 
-### Functions 
+Version 0 comes with a wrapper function that allows the code to run using a CLI. The file name run_code.py should be executed to allow for an interactive CLI based environment. The user can still use his/her own workflow by using the ERA5 class. For that, please go over the next more detailed section which covers each individual function. 
+
+To launch the program, the user must have a datafolder which contains only the datafiles. After entering the folder src from the command prompt, execute the python script run_code.py
+To save the data, provide a name of the directory where the results have to be saved. If the directory doesn't exist, a new one by the same name entered by the user will be created. The csv files will be written using the current date and time to avoid overwriting in case the user wishes to extract information for multiple coordinates in the same directory. 
+
+## Functions 
 Under this section, we will cover each function available within the ERA5 class, specify the inputs and outputs for them and the datatypes. 
 
 
 This class takes in a number of arguments. All these make it extremely important that each argument passed down is referenced with the variable definition as defined in the class. 
+
+class ERA5():
+An ERA5 instance is a collection of dimensions, groups, variables and atttributes that together define the data contained within a netcdf4 file downloaded from the copernicus website between the range 1979 - 2019. 
+
+- ERA5()
+	__init__(self, directory)
+		This is the initialization function. To declare an instance of the class ERA5, call the class from the library ERA5 and pass on the directory containing the datafiles. Please note that this function might need to be adjusted for Windows based handling. If any datafile is missing from the output, please notify the developers. 
+
+
 
 
 ### Warnings:
