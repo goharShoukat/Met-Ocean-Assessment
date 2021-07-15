@@ -58,7 +58,40 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 
 - ERA5()
 	__init__(self, directory)
-		This is the initialization function. To declare an instance of the class ERA5, call the class from the library ERA5 and pass on the directory containing the datafiles. Please note that this function might need to be adjusted for Windows based handling. If any datafile is missing from the output, please notify the developers. 
+		This is the initialization function. To declare an instance of the class ERA5, call the class from the library ERA5 and pass on the directory containing the datafiles. Please note that this function might need to be adjusted for Windows based handling. If any datafile is missing from the output, please notify the developers.
+		This function only takes in one string input and has no output.  
+- def load_variable(self, variable_list):
+	This function is used to extract 3D arrays from the raw netcdf files. It reads in the entire input file but only extracts - as 3D arrays, information about variables which the user asks for. 
+	The input for this function is a numpy array: numpy.ndarray, created from the user input. The input is casted astype numpy.ndarray from a list. It is then passed on as an argument to this function. 
+	The output of this function is a data structure of type - dict. This dict contains the following data. Also mentioned here is the individual data type of each element within the dictionary:
+        time : Masked array of strings : contains the array of the time
+        latitude : numpy.ndarray of float : array of latitude
+        longitude : numpy.ndarray of float : array of longitude
+        variable : numpy.ndarray of float : array of the extracted data
+        lenght :numpy.ndarray of  int : length of each file. needed to split the data in another function
+	Units : pandas.DataFrame : dataframe of the units of the variables chosen by the user. Can be referenced by the variable itself. 
+
+	Note: This function scans the entire datafile for the given variable and extracts information contained within it for all available coordinates. Further filtering is done by the next function. 
+
+- def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False):
+	This function takes the dictionary created by the previous function and extracts data for a given coordinate. The dictionary is not one of the input arguments. The dictionary is key to the entire structure of the code and is self referenced throughout the class. As such, all methods  of this class will be able to access it. 
+	The following are the input parameters and the expected data type: 
+	variables : numpy.ndarray of string : variable for which the data has to be extracted
+        lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function
+        the index of the latitude and longitude need to be transmitted
+        the actual longitude and latitude need not be mentioned
+        neighouring_cells_request_active : boolean : this will be true only when we are exploring neighouring cells
+        the neighouring_cells_request_active : remain false when multiple variables are being querried
+        important to include this here because this function will be called in the function explore_more_points. 
+        however, this function also has a call to this very function. 
+        to prevent from getting stuck in an infinite loop, this argument is added. 
+        
+
+
+output
+        dataframe of the variable data along with the time and lan and lat information
+        availability at this point
+         
 
 
 
