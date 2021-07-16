@@ -112,7 +112,7 @@ class ERA5():
     def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False):
         #self.cache with all the coordinates data will be used for this function
         #input
-        #variables : string : variable for which the data has to be extracted
+        #variables : numpy.ndarray of string : variable for which the data has to be extracted
         #lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function
         #the index of the latitude and longitude need to be transmitted
         #the actual longitude and latitude need not be mentioned
