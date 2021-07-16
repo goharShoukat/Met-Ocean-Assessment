@@ -57,19 +57,38 @@ class ERA5():
 An ERA5 instance is a collection of dimensions, groups, variables and atttributes that together define the data contained within a netcdf4 file downloaded from the copernicus website between the range 1979 - 2019. 
 
 - ERA5()
+
+
 	__init__(self, directory)
 		This is the initialization function. To declare an instance of the class ERA5, call the class from the library ERA5 and pass on the directory containing the datafiles. Please note that this function might need to be adjusted for Windows based handling. If any datafile is missing from the output, please notify the developers.
-		This function only takes in one string input and has no output.  
-- def load_variable(self, variable_list):
+		
+	This function only takes in one string input and has no output.  
+	
+	- def load_variable(self, variable_list):
+
 	This function is used to extract 3D arrays from the raw netcdf files. It reads in the entire input file but only extracts - as 3D arrays, information about variables which the user asks for. 
-	The input for this function is a numpy array: numpy.ndarray, created from the user input. The input is casted astype numpy.ndarray from a list. It is then passed on as an argument to this function. 
-	The output of this function is a data structure of type - dict. This dict contains the following data. Also mentioned here is the individual data type of each element within the dictionary:
+	
+	The input for this function is: 
+	
+		numpy array: numpy.ndarray, created from the user input. 
+		
+		The input is casted astype numpy.ndarray from a list. It is then passed on as an argument to this function. 
+		
+	The output of this function is:
+		
+		a data structure of type - dict. This dict contains the following data. Also mentioned here is the individual data type of each element within the dictionary:
+		
         time : Masked array of strings : contains the array of the time
-        latitude : numpy.ndarray of float : array of latitude
-        longitude : numpy.ndarray of float : array of longitude
-        variable : numpy.ndarray of float : array of the extracted data
-        lenght :numpy.ndarray of  int : length of each file. needed to split the data in another function
-	Units : pandas.DataFrame : dataframe of the units of the variables chosen by the user. Can be referenced by the variable itself. 
+        
+		latitude : numpy.ndarray of float : array of latitude
+
+		longitude : numpy.ndarray of float : array of longitude
+
+		variable : numpy.ndarray of float : array of the extracted data
+
+		lenght :numpy.ndarray of  int : length of each file. needed to split the data in another function
+
+		Units : pandas.DataFrame : dataframe of the units of the variables chosen by the user. Can be referenced by the variable itself. 
 
 	Note: This function scans the entire datafile for the given variable and extracts information contained within it for all available coordinates. Further filtering is done by the next function. 
 
@@ -79,42 +98,58 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 
 	The following are the input parameters and the expected data type: 
 
-	- variable : string : variable for which the data has to be extracted - note that for this function, the entire list of variables which the user inputs is not passed on. Each individual variable from the list is passed on and data is extracted. 
+		variable : string : variable for which the data has to be extracted - note that for this function, the entire list of variables which the user inputs is not passed on. Each individual variable from the list is passed on and data is extracted. 
         
-        -  lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function. Note that these two arguments are marked as False. This means that the object will have access to the index of the selected coordinates throughout its methods. However, this functionality is provided in the event a user wants to supercede the internal access and trasnmit coordinates of the points of interest. Another important information here is that the indices  of the latitude and longitude need to be transmitted. This information is made available to the user through the dictionary output available from the function nearest_point() which we will discuss next. The actual longitude and latitude need not be mentioned
+        	 lat_idx / lon_idx : float : Indices of the latitude and longitude
+	
+	Under normal circumstances, these will be self transmitted to the function. Note that these two arguments are marked as False. This means that the object will have access to the index of the selected coordinates throughout its methods. However, this functionality is provided in the event a user wants to supercede the internal access and trasnmit coordinates of the points of interest. Another important information here is that the indices  of the latitude and longitude need to be transmitted. This information is made available to the user through the dictionary output available from the function nearest_point() which we will discuss next. The actual longitude and latitude need not be mentioned
 	
 
 	This function outputs a dataframe of the variable(s). This dataframe has the following information:
 	
-	- Latitude and its units
+		 Latitude and its units
 	
-	- Longitude and its units
+		 Longitude and its units
+		
+		 Date of the measurement
 	
-	- Date of the measurement
-	
-	- Variable data
+		 Variable data
 	
 	Depening on the number of input variables, the columns will increase. 
 	
 	Availability of that particular variable at that coordinate as a percentage. 
 
+
 - def check_availability(self, df, variable):
         This function evaluates percentage of the times the data point has availability of data. It function sums up the number of data points that are empty in the series and returns a percentage
         For input, this function takes in the dataframe generated by the function extract_coordinate_data(). This also takes in the individual variable and prints a statement to the console as well. 
-        #df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
-	Output: float : Percentage of availability for the variable
+	
+        	df : Pandas DataFrame : checks the availibility of the data for the specifc dataframe and variable
+
+		variable : str : single variable. 
+	Output:
+		
+		Avalability: float : Percentage of availability for the variable
 
 - def nearest_point(self, lat_user, lon_user, radius = 1):
-        #function to calculate the nearest data points
-        #lon_file : Array of float64 : Array passed on from the netcdf file
-        #lat_file : Array of float64 : Array passed on from the netcdf file
-        #lon_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
-        #lat_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
-        #radius : int : specifiy the number of neighouring cells to explore. can only be defined interms of the neighouring cells. not distance
-        #Outputs
-        #Dictionary data type with the indexes and the corresponding values 
-        #of longitude and latitude from the original file
        
+     Function to calculate the nearest data points. The inputs are:
+     
+        lon_file : Array of float64 : Array passed on from the netcdf file
+        
+		lat_file : Array of float64 : Array passed on from the netcdf file
+        
+		lon_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
+        
+		lat_user : float64 : coordinate passed onto the function by the user for which closest neighour is required
+        
+		radius : int : specifiy the number of neighouring cells to explore. can only be defined interms of the neighouring cells. not distance
+        
+	The Outputs are:
+	
+        	Dictionary data type with the indexes and the corresponding values of longitude and latitude from the original file
+ 
+
 - def calculate_dist(self, lat_user, lon_user, lat_nearest, lon_nearest):
 
        This function calculates the distance using the haversine formula between any two coordinate points. In the structure of the code though, this is used to find the distance between the user specified point and the nearest grid point. 
@@ -139,19 +174,21 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 
 	The following are the inputs:    
 
-        - variable : array of string : contains all the variables for which 
+        variable : array of string : contains all the variables for which 
         
 	- research_more_points : dictionary of nearest point
         
-        The following are the outputs of this method. 
+     The following are the outputs of this method. 
        
-	- combined_df : pandas.DataFrame : cotaining Date, lat/lon, variables
-        - availability : np.array of float : array of the availibitly for all variables
+		combined_df : pandas.DataFrame : cotaining Date, lat/lon, variables
+        	
+		availability : np.array of float : array of the availibitly for all variables
 
 
 
 - def write_coordinate_data(self, df, variable, output_direc):
-        This function  writes the extracted data points to a csv
+        
+	This function  writes the extracted data points to a csv
 
         The followijnga are the inputs this takes:
 
@@ -167,13 +204,15 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 	
 	The following are the arguments of this function:
                 
-	- row_idx : int : row index for the center point for which nearest neighour needs to be searched
+		 row_idx : int : row index for the center point for which nearest neighour needs to be searched
         
-	- col_idx : int : index for the center point for which nearest neighour needs to be searched
+		 col_idx : int : index for the center point for which nearest neighour needs to be searched
         
 	The input to this function comes from the output of the function nearest_point(). The indices of the nearest point are stored within the dictionary this function outputs. 
         
-	The output is a list of the indices of the neighouring cells. 
+	The output is a:
+	
+		list of the indices of the neighouring cells. 
 
 - def explore_more_points(self, variable):
 	
@@ -184,16 +223,6 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
         - variable : array of string : for which the calculation is being carried out
         
 	The other input parameters need not be provided by the user. They are self referenced and called from within this method. However, this should only be used after the functions nearest_point() and next_nearest_point() are already called, in this very order. 
-
-
-
-
-
-
-
-
-
-
 
 
 
