@@ -74,17 +74,28 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 	Note: This function scans the entire datafile for the given variable and extracts information contained within it for all available coordinates. Further filtering is done by the next function. 
 
 - def extract_coordinate_data(self, variable, lat_idx = False, lon_idx = False):
+
 	This function takes the dictionary created by the previous function and extracts data for a given coordinate. The dictionary is not one of the input arguments. The dictionary is key to the entire structure of the code and is self referenced throughout the class. As such, all methods  of this class will be able to access it. 
+
 	The following are the input parameters and the expected data type: 
-	variable : string : variable for which the data has to be extracted - note that for this function, the entire list of variables which the user inputs is not passed on. Each individual variable from the list is passed on and data is extracted. 
-        lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function. Note that these two arguments are marked as False. This means that the object will have access to the index of the selected coordinates throughout its methods. However, this functionality is provided in the event a user wants to supercede the internal access and trasnmit coordinates of the points of interest. 
-        Another important information here is that the indices  of the latitude and longitude need to be transmitted. This information is made available to the user through the dictionary output available from the function nearest_point() which we will discuss next. The actual longitude and latitude need not be mentioned
+
+	- variable : string : variable for which the data has to be extracted - note that for this function, the entire list of variables which the user inputs is not passed on. Each individual variable from the list is passed on and data is extracted. 
+        
+        -  lat_idx / lon_idx : float : under normal circumstances, these will be self transmitted to the function. Note that these two arguments are marked as False. This means that the object will have access to the index of the selected coordinates throughout its methods. However, this functionality is provided in the event a user wants to supercede the internal access and trasnmit coordinates of the points of interest. Another important information here is that the indices  of the latitude and longitude need to be transmitted. This information is made available to the user through the dictionary output available from the function nearest_point() which we will discuss next. The actual longitude and latitude need not be mentioned
+	
+
 	This function outputs a dataframe of the variable(s). This dataframe has the following information:
+	
 	- Latitude and its units
+	
 	- Longitude and its units
+	
 	- Date of the measurement
+	
 	- Variable data
+	
 	Depening on the number of input variables, the columns will increase. 
+	
 	Availability of that particular variable at that coordinate as a percentage. 
 
 - def check_availability(self, df, variable):
@@ -122,6 +133,23 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 
         The output of this function is the distance between the two coordinates in Km. 
 
+
+- def df_generator(self, variable):
+        Function to generate a combined dataframe of all the variables within the variable array created from user specified variables. It also makes necessary calls to other functions in the event there is low availability for the variables. 
+
+	The following are the inputs:    
+
+        - variable : array of string : contains all the variables for which 
+        
+	- research_more_points : dictionary of nearest point
+        
+        The following are the outputs of this method. 
+       
+	- combined_df : pandas.DataFrame : cotaining Date, lat/lon, variables
+        - availability : np.array of float : array of the availibitly for all variables
+
+
+
 - def write_coordinate_data(self, df, variable, output_direc):
         This function  writes the extracted data points to a csv
 
@@ -144,9 +172,28 @@ An ERA5 instance is a collection of dimensions, groups, variables and atttribute
 	- col_idx : int : index for the center point for which nearest neighour needs to be searched
         
 	The input to this function comes from the output of the function nearest_point(). The indices of the nearest point are stored within the dictionary this function outputs. 
-        #output
-        #returns a list        
-    
+        
+	The output is a list of the indices of the neighouring cells. 
+
+- def explore_more_points(self, variable):
+	
+	This function is required to build the wrapper which uses this class ERA5(). This function makes repeated calls to the function extract_coordinate_data(), to generate the dataframes with the data for each individual variable within the array of variables. It works in tandem with the next_nearest_point() function. It calculates the distance for each new grid point found from the function next_nearest_point()
+	
+	It takes the following argument:
+	
+        - variable : array of string : for which the calculation is being carried out
+        
+	The other input parameters need not be provided by the user. They are self referenced and called from within this method. However, this should only be used after the functions nearest_point() and next_nearest_point() are already called, in this very order. 
+
+
+
+
+
+
+
+
+
+
 
 
 
