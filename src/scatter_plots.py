@@ -15,6 +15,8 @@ import seaborn as sns
 from matplotlib import cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from scipy.stats import gaussian_kde
+
+
 direc = 'tests/results/'
 df = pd.read_csv(direc + '07_29-02_43_PM.csv', index_col = False)
 df['Date'] = pd.to_datetime(df['Date'])
@@ -60,7 +62,7 @@ cbar.set_label('Number of points in the 0.05 x 0.05 bin')
 plt.set_cmap('inferno')
 #plt.plot(H, T01428, label = '$\epsilon$ = 1/7')
 #plt.plot(H, T125, label = '$\epsilon$ = 1/12.5')
-#plt.plot(H, T15, label = '$\epsilon$ = 1/15')
+plt.plot(H, T15, label = '$\epsilon$ = 1/15')
 plt.plot(H, T20, label = '$\epsilon$ = 1/20')
 plt.plot(H, T25, label = '$\epsilon$ = 1/25')
 plt.plot(H, T30, label = '$\epsilon$ = 1/30')
@@ -69,3 +71,23 @@ plt.legend()
 plt.title('{} $^\circ$N, {} $^\circ$E \n Scatter Plot & Kernel Density : ({} - {})'.format(df['latitude (degrees_north)'][0], df['longitude (degrees_east)'][0],df['new_date'][0], df.iloc[-1]['new_date']))
 plt.show()
 plt.savefig('Plots/Scatter_Plots.pdf')
+
+
+levels = [0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999]
+plt.figure(figsize=(30,30))
+p = sns.kdeplot(swh, mwp, label = 'Data', levels = levels)
+plt.xlabel('Significant Wave Height (m)')
+plt.ylabel('Mean Wave Period (s)')
+plt.title('{} $^\circ$N, {} $^\circ$E \n SWH vs MWP Kernel Density Contout Plot : ({} - {})'.format(df['latitude (degrees_north)'][0], df['longitude (degrees_east)'][0],df['new_date'][0], df.iloc[-1]['new_date']))
+plt.grid()
+plt.plot(H, T15, '--', label = '$\epsilon$ = 1/15', linewidth=0.5)
+plt.plot(H, T20, '--', label = '$\epsilon$ = 1/20', linewidth=0.5)
+plt.plot(H, T25, '--', label = '$\epsilon$ = 1/25', linewidth=0.5)
+plt.plot(H, T30, '--', label = '$\epsilon$ = 1/30', linewidth=0.5)
+plt.legend()
+plt.text(8, 4, 'Level Curves Enclosing\n10\n30\n50\n70\n90\n99\n99.9', color='black', 
+        fontsize=9)
+plt.savefig('Plots/kde_contour.pdf')
+
+
+
