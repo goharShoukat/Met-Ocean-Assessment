@@ -15,29 +15,7 @@ import time
 import sys
 sys.path.append('/Users/goharshoukat/Documents/GitHub/Met-Ocean-Assessment/src/')
 from ERA5 import ERA5
-'''
-def df_generator(era5_inst, variable, nearest_dict):
-    #inputs
-    #instance of the declared era5 class : class ERA%
-    #variable : list 
-    #nearest_dcit : dictionary : nearest coordinates 
-    
-    #output
-    #df : pandas dataframe : with all the data
-    #avail : float : percentage of data availability
-    if len(variable) == 1:    
-        df, avail = era5_inst.extract_coordinate_data(variable[0], nearest_dict['latitude index'], nearest_dict['longitude index'])
-    else:
-        #extract multiple variable information
-        df = pd.DataFrame()
-        availability = []
-        for var in variable[0:]:
-            df2, avail = era5_inst.extract_coordinate_data(var, nearest_dict['latitude index'], nearest_dict['longitude index'], False)
-            df[var] = df2[var]
-            availability = np.append(availability, avail)
-    
-    return df, availability
-'''
+
 def run_script():
     directory = input('Enter the directory of the data folder: \n')
     #directory = '/Users/goharshoukat/Documents/GitHub/Met-Ocean-Assessment/some_data/'
@@ -78,8 +56,7 @@ def run_script():
             x.write_coordinate_data(df, variable, out_direc)
             print('Successfully Saved \n\n')
 
-    
-    if avail[0] != 100:
+    if not all(i == 100 for i in avail):
         #if availability of selected point is less than 100, user will be given an optino to select a new coordinate. 
         select_new_coord = input('Do you want to select a new coordinate because your previous selection had low availability?')
    
