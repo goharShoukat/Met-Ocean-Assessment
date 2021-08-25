@@ -4,10 +4,13 @@
 Created on Fri Jul 23 18:50:29 2021
 
 @author: goharshoukat
+
+script to generate wave rose diagrams with edited source codes for windrose library 
+to generate customised labels and have a calm circle in the middle
 """
 
 
-from windrose import WindroseAxes
+from src.windRose import WindroseAxes
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,6 +40,6 @@ ax.set_thetagrids(range(0,360,45), [90, 45, 0, 315, 270, 225, 180, 135])
 ax.set_theta_zero_location('W', offset=-180)
 ax.set_xticklabels(['E', 'NE', 'N', 'NW',  'W', 'SW', 'S', 'SE'])
 #ax.add_patch(circle1)
-#ax.set_rorigin(-5)
-plt.text(0., 0., "Calm", size=18, ha="center", va="center", bbox=dict(boxstyle="circle") )
+ax.set_rorigin(-2)
+plt.text(-2., -2., "Calm", size=9, ha="center", va="center", bbox=dict(boxstyle="circle") )
 ax.set_legend()
