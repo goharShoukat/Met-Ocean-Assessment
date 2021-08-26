@@ -15,6 +15,8 @@ Use those indices to extract windows
 
 remove the bearing and magnitude calculation from this file when automating. 
 dump wind calculation functions into another file
+
+when automating the script, run the entire code from filteration of monthly values to the end in a loop 12 times
 """
 
 
@@ -41,7 +43,7 @@ def bearing(vector):
 
 
 direc = 'tests/results/'
-df = pd.read_csv(direc + '08_25-08_27_PM.csv', index_col = False)
+df = pd.read_csv(direc + '08_26-09_01_PM.csv', index_col = False)
 df = df.rename(columns = {'swh (m)' : 'swh', 'Date' : 'Start Date'})
 df = df.rename(columns = {'u10 (m s**-1)' : 'u10', 'v10 (m s**-1)' : 'v10'})
 df['Start Date'] = pd.to_datetime(df["Start Date"])
@@ -52,7 +54,8 @@ resultant_vector = np.array(df[{'u10', 'v10'}].values.tolist())
 angle = bearing(resultant_vector)    
 df['angle'] = angle
 
-#implement filtering
+
+Jan = df[df['Start Date'].dt.month==1].reset_index(drop=True)
 swh_limit = 1.5
 vel_limit = 5
 
@@ -61,11 +64,11 @@ vel_limit = 5
 #conditions ahve to be met for a False which isnt always the case. when any
 # of the two conditions become invalid, a false should be registered. 
 #For true however, both conditions should be met
-df.loc[(df['swh'] <= swh_limit) & (df['magnitude'] <= vel_limit), 'bool'] = True
-df.loc[(df['swh'] > swh_limit) | (df['magnitude'] > vel_limit), 'bool'] = False 
+Jan.loc[(Jan['swh'] <= swh_limit) & (Jan['magnitude'] <= vel_limit), 'bool'] = True
+Jan.loc[(Jan['swh'] > swh_limit) | (Jan['magnitude'] > vel_limit), 'bool'] = False 
 
 
-v = np.array(df['bool'])
+v = np.array(Jan['bool'])
 
 #two methods for identifying when the boolean changes from true to false and vice versa
 #this method is deprecated and hence error prone. however, for future reference, 
@@ -75,13 +78,38 @@ v = np.array(df['bool'])
 #gives us the index everytime boolean changes
 #one has to be added to i and subtracted from i+1
 y = np.where(np.diff(v))[0]
-new_df = df.loc[y] #queries the original dataframe to extract only relevent indices where the conditions are met
+new_df = Jan.loc[y] #queries the original dataframe to extract only relevent indices where the conditions are met
 #create another column with the end date
 #first reset the indices 
 new_df = new_df.reset_index(drop = True)
 
-new_df.insert(1, 'End Date', '')#specifies location for adding the end date column
+new_df.insert(1, 'End Date', None)#specifies location for adding the end date column
 new_df.loc[0:(len(new_df)-2), 'End Date'] = new_df['Start Date'][1:].reset_index(drop = True)
 new_df['End Date'] = pd.to_datetime(new_df["End Date"])
 #calculate the difference between each element 
+#these are hourly calculations
 new_df.insert(2, 'Duration', (new_df['End Date'] - new_df['Start Date']).astype('timedelta64[h]'))
+
+#when binning monthly, there is a cell when the year changes. 
+#this means that the duration will always be around a year's difference
+#we first identify where the year changes, then make that cell none
+#np.where identifies where the year changes
+#with loc, we alter the cell value
+new_df.loc[np.where((new_df['End Date'].dt.year - new_df['Start Date'].dt.year) >= 1)[0], 'Duration'] = None
+
+
+
+
+#dataframe with the compiled results which will be published
+columns = ['>= Period (h)', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 
+                                  'Oct', 'Nov', 'Dec']
+results = pd.DataFrame(columns = columns)
+results['>= Period (h)'] = [3, 6, 12, 24, 48, 72]
+
+for i in results['>= Period (h)']:
+    x = (new_df[new_df['Duration'] >= i])['Duration'].sum(axis = 0)/len(new_df)
+    results.loc[results['>= Period (h)'] == i, 'Jan'] = x
+#calculate the percentages for when the values are greater than each 
+#of the durations specified by the period column of results
+
+
