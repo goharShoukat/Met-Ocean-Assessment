@@ -6,6 +6,8 @@ Created on Fri Aug 27 23:01:52 2021
 @author: goharshoukat
 
 Script for making graphs from weather window analysis
+
+script ready for all velocities but only one swh
 """
 
 import numpy as np
@@ -31,42 +33,61 @@ df['magnitude'] = np.sqrt(df['u10']**2 + df['v10']**2)
 #create a dataframe where the results for the graph will be compiled
 #columns are different velocities
 #index are months
-results = pd.DataFrame(columns=vel, index = months)
+results = pd.DataFrame(columns=velocity, index = months)
+#create a dataframe standard deviation information
+sd = pd.DataFrame(columns = velocity, index = months)
 
-month_df = df[df['Start Date'].dt.month==1].reset_index(drop=True)
-array = []
-for vel in velocity:
+for m_in, m in zip(months_int, months):       
+    
+    month_df = df[df['Start Date'].dt.month==m_in].reset_index(drop=True)
+    
+    for vel in velocity:
         
+            
+        #codntion should be with or condition. otherwise, nan comes because both 
+        #conditions ahve to be met for a False which isnt always the case. when any
+        # of the two conditions become invalid, a false should be registered. 
+        #For true however, both conditions should be met
         
-    #codntion should be with or condition. otherwise, nan comes because both 
-    #conditions ahve to be met for a False which isnt always the case. when any
-    # of the two conditions become invalid, a false should be registered. 
-    #For true however, both conditions should be met
-    
-    #filter month_df to extract relevent information
-    month_df.loc[(month_df['swh'] <= 1.5) & (month_df['magnitude'] <= vel), 'bool'] = True
-    month_df.loc[(month_df['swh'] > 1.5) | (month_df['magnitude'] > vel), 'bool'] = False 
-    v = np.array(month_df['bool'])
-    y = np.where(np.diff(v))[0]
-    new_df = month_df.loc[y] #queries the original dataframe to extract only relevent indices where the conditions are met
-    #create another column with the end date
-    #first reset the indices 
-    new_df = new_df.reset_index(drop = True)
-    
-    new_df.insert(1, 'End Date', None)#specifies location for adding the end date column
-    new_df.loc[0:(len(new_df)-2), 'End Date'] = new_df['Start Date'][1:].reset_index(drop = True)
-    new_df['End Date'] = pd.to_datetime(new_df["End Date"])
-    #calculate the difference between each element 
-    #these are hossurly calculations
-    new_df.insert(2, 'Duration', (new_df['End Date'] - new_df['Start Date']).astype('timedelta64[h]'))
-    
-    #when binning monthly, there is a cell when the year changes. 
-    #this means that the duration will always be around a year's difference
-    #we first identify where the year changes, then make that cell none
-    #np.where identifies where the year changes
-    #with loc, we alter the cell value
-    new_df.loc[np.where((new_df['End Date'].dt.year - new_df['Start Date'].dt.year) >= 1)[0], 'Duration'] = None
-    
-    #searches the new_df where duration exceeds 24 hours
-    results.loc['Jan', vel] =  new_df[new_df['Duration'] >= 24]['Duration'].sum(axis = 0) / len(new_df) * 100
+        #filter month_df to extract relevent information
+        month_df.loc[(month_df['swh'] <= 2) & (month_df['magnitude'] <= vel), 'bool'] = True
+        month_df.loc[(month_df['swh'] > 2) | (month_df['magnitude'] > vel), 'bool'] = False 
+        v = np.array(month_df['bool'])
+        y = np.where(np.diff(v))[0]
+        new_df = month_df.loc[y] #queries the original dataframe to extract only relevent indices where the conditions are met
+        #create another column with the end date
+        #first reset the indices 
+        new_df = new_df.reset_index(drop = True)
+        
+        new_df.insert(1, 'End Date', None)#specifies location for adding the end date column
+        new_df.loc[0:(len(new_df)-2), 'End Date'] = new_df['Start Date'][1:].reset_index(drop = True)
+        new_df['End Date'] = pd.to_datetime(new_df["End Date"])
+        #calculate the difference between each element 
+        #these are hossurly calculations
+        new_df.insert(2, 'Duration', (new_df['End Date'] - new_df['Start Date']).astype('timedelta64[h]'))
+        
+        #when binning monthly, there is a cell when the year changes. 
+        #this means that the duration will always be around a year's difference
+        #we first identify where the year changes, then make that cell none
+        #np.where identifies where the year changes
+        #with loc, we alter the cell value
+        new_df.loc[np.where((new_df['End Date'].dt.year - new_df['Start Date'].dt.year) >= 1)[0], 'Duration'] = None
+        
+        #searches the new_df where duration exceeds 24 hours
+        results.loc[m, vel] =  new_df[new_df['Duration'] >= 24]['Duration'].sum(axis = 0) / len(month_df) * 100
+        
+        #make calculations for standard deviation
+        sd.loc[m, vel] = np.std(new_df[new_df['Duration'] >= 24]['Duration'])/ 100
+        
 
+plt.figure(figsize = (30,30))
+for col in results.columns:
+    plt.errorbar(results.index, results[col], sd[col], capsize = 3, label = (col))
+plt.legend(title = '$V_{10}$ (m/s)')
+plt.grid(True, axis = 'y', linestyle = '--', linewidth=0.5)
+plt.title('$H_s = {}$, Weather Window Analysis'.format(swh[0]))
+plt.savefig('Plots/weather_graphs.pdf')
+
+
+z = (new_df[new_df['Duration'] >= 24]['Duration']) 
+        
