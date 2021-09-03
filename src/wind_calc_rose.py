@@ -7,6 +7,15 @@ Created on Wed Aug 18 12:21:51 2021
 @author: goharshoukat
 
 Script to create tables and graphs for weather-window analysis
+
+bearing and magnitude functions needs to be put in a seperate file
+
+these functions are used by more than one file
+
+angles need to be reversed for the frequency of occurance tables
+
+they need not be reversed just for the windrose plot because blowto command
+allows the functionality to reverse the directions.
 """
 
 import pandas as pd
@@ -34,7 +43,7 @@ def bearing(vector):
 
 
 direc = 'tests/results/'
-df = pd.read_csv(direc + '08_25-08_22_PM.csv', index_col = False)
+df = pd.read_csv(direc + '08_25-08_36_PM.csv', index_col = False)
 df['Date'] = pd.to_datetime(df['Date'])
 df = df.rename(columns = {'u10 (m s**-1)' : 'u10', 'v10 (m s**-1)' : 'v10'})
 df['magnitude'] = np.sqrt(df['u10']**2 + df['v10']**2)
