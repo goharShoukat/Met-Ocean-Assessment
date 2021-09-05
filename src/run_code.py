@@ -66,13 +66,14 @@ def run_script():
                 lon = float(input('Enter the Longitude: \n'))
                 nearest2 = x.nearest_point(lat, lon)
                 df2, avail2 = x.df_generator(variable)
-                return df2, variable, cache["Units"]
+                
                  
                 if_save = input('Do you wish to save the data for this coordinate? \n')
                 if if_save == 'yes':
                     out_direc = input('Please provide directory to save the data \n')
                     x.write_coordinate_data(df2, variable, out_direc)
                     print('Successfully Saved \n\n')
+                    return df2, variable, cache["Units"]
                     
 
     

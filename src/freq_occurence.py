@@ -28,29 +28,32 @@ from matplotlib.font_manager import FontProperties
 import seaborn as sns
 from datetime import datetime
 
-def frequency_occurence(x, y, x_label, y_label, Coordinates, date_range, title):
+def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, title, units, direc):
     #inputs
-    #x: ndarray : input array
-    #y: ndarray : input array
-    #x_label : string : specifies what the array is and what are the units of x
-    #y_label : string : specifies what the array is and what are the units of y
+    #df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+    #x_variable: str : x variable name for the heatmap. like mwp
+    #y_variable: ndarray : input array like swh
     #the titles are used in plotting
     
     #Coordinates : str : The coordinates for which this data is extracted
     #date_range : str : The date interval for which this data corresponds to
     #title : str : title of the plot e.g. mwp vs swh
+    #units : list : list of two elements. units[0] = unit of x, units[1] = unit of y
+    #direc : str : output directory entered by user
     #output:
         #Frequency of Occurence Plot of the two specified quantities
     
     #y is divided into bins of 0.5 deltas. inputting swh as y is recommended
     #x is divded into bins of 1 delta. inputting mwp is recommended
+    #f['Date'] = pd.to_datetime(df['Date'])
+   
+    y = df[y_variable].to_numpy()
+    x = df[x_variable].to_numpy()
     bins_y = np.linspace(np.floor(min(y)), np.ceil(max(y)), int(np.ceil(max(y)) - np.floor(min(y)))*2+1) #converts height into 0.5 bins
     bins_x = np.linspace(np.floor(min(x)), np.ceil(max(x)), int(np.ceil(max(x)) - np.floor(min(x)))+1) #returns bins with detla=1 bins
-    
-    #calculate 2d histogram here
     counts, xedges, yedges = np.histogram2d(x, y, bins=(bins_x, bins_y))
-    counts = counts/len(x) * 100 #convert it into a percentage
-    counts = np.flip(counts, axis = 0) #flip the values to dispay on the plot from low to high
+    counts = counts/len(df) * 100
+    counts = np.flip(counts, axis = 0)
     #following loops are important to create customized labels. 
     #otherwise, instead of range, single value points are specified. 
     xnew = [] 
@@ -78,7 +81,8 @@ def frequency_occurence(x, y, x_label, y_label, Coordinates, date_range, title):
     acc_col = [] #accumulative of each column
     for i in range(1,np.shape(sum_col_arr)[1]+1):
         acc_col = np.append(acc_col, np.sum(sum_col_arr[0, 0:i])).reshape(1, -1)
-    
+        
+        
     sum_col = np.append(sum_col_arr, acc_col, axis = 0) #merge the two columns together for the sums
     #sum_col = np.round(sum_col, 3)
     counts = np.append(counts, sum_col, axis = 0)
@@ -125,6 +129,7 @@ def frequency_occurence(x, y, x_label, y_label, Coordinates, date_range, title):
     mask3[np.shape(counts)[0]-1, np.shape(counts)[1]-1] = True#remove the 0s at the end of the two rows and columns
     mask3[np.shape(counts)[0]-1, np.shape(counts)[1]-1-1] = True
     mask3[np.shape(counts)[0]-1-1, np.shape(counts)[1]-1] = True
+
     
     ax = sns.heatmap(counts, annot = True, linewidths=0.5, mask = mask,\
                      cbar = False, xticklabels=ynew, yticklabels=xnew, annot_kws={"size": 'small'})
@@ -153,25 +158,19 @@ def frequency_occurence(x, y, x_label, y_label, Coordinates, date_range, title):
     
     
     plt.tick_params('both', bottom=False, left=False)
-    plt.ylabel(x_label)
-    plt.xlabel(y_label)
+    plt.ylabel(x_variable + ' (' + units[0] + ')')
+    plt.xlabel(y_variable + ' (' + units[1] + ')')
     plt.xticks(rotation=70)
-    
     plt.title('{}\nFrequency of Occurrence ({}): {}'.format(Coordinates, title, date_range))
     
     plt.tight_layout()
-    
-    now = datetime.now()
-    
-    current_time = now.strftime("%H:%M:%S")
-    
-    plt.savefig('Plots/'+ 'Freq_Occ' + '.pdf')
-    
+    plt.savefig(direc + 'Heatmap ' + title + '.pdf')
+    plt.close()
 
 #code tests
 #direc = 'tests/results/'
-#df = pd.read_csv(direc + '09_03-08_41_PM.csv', index_col = False)
-#frequency_occurence(df['mwp (s)'].to_numpy(), df['swh (m)'].to_numpy(), 'mwp (s)', 'swh (m)', '51.5 N, -8 E', '1979 - 2019', 'mwp vs swh')
+#df = pd.read_csv('09_03-08_41_PM.csv', index_col = False)
+#frequency_occurence(df, 'mwp (s)', 'swh (m)', '51.5  $^\circ$N, -8 E', '1979 - 2019', 'mwp vs swh', ['s', 'm'])
 
 '''
 direc = 'tests/results/'
