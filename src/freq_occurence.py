@@ -16,7 +16,6 @@ Creates heatmaps
 """
 
 
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -110,7 +109,7 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
     mask[:, -2:] = True
     
     
-    plt.figure(figsize = (30,30))
+    fig = plt.figure(figsize = (30,30))
     #x and y labels are reversed to change orientation of the curve
     
     #mask all elements except the last row and last column
@@ -163,18 +162,18 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
     plt.xticks(rotation=70)
     plt.title('{}\nFrequency of Occurrence ({}): {}'.format(Coordinates, title, date_range))
     
-    plt.tight_layout()
+    fig.tight_layout()
     plt.savefig(direc + 'Heatmap ' + title + '.pdf')
     plt.close()
 
 #code tests
 #direc = 'tests/results/'
 #df = pd.read_csv('09_03-08_41_PM.csv', index_col = False)
-#frequency_occurence(df, 'mwp (s)', 'swh (m)', '51.5  $^\circ$N, -8 E', '1979 - 2019', 'mwp vs swh', ['s', 'm'])
+#frequency_occurence(df, 'mwp', 'swh', '51.5  $^\circ$N, -8 E', '1979 - 2019', 'mwp vs swh', ['s', 'm'], 'plots/')
 
 '''
-direc = 'tests/results/'
-df = pd.read_csv(direc + '07_09-05_10_PM.csv', index_col = False)
+direc = 'results/'
+df = pd.read_csv(direc + '09_05-08_51_PM.csv', index_col = False)
 df['Date'] = pd.to_datetime(df['Date'])
 
 y = df['swh (m)'].to_numpy()
@@ -239,7 +238,7 @@ mask[-2:, :] = True
 mask[:, -2:] = True
 
 
-plt.figure(figsize = (30,30))
+fig = plt.figure(figsize=(30,30))
 #x and y labels are reversed to change orientation of the curve
 
 #mask all elements except the last row and last column
@@ -289,12 +288,12 @@ plt.tick_params('both', bottom=False, left=False)
 plt.ylabel('mwp (s)')
 plt.xlabel('swh (m)')
 plt.title('Frequency of Occurance (mwp vs $swh$)')
-
-plt.tight_layout()
+fig.tight_layout()
+plt.show()
 
 now = datetime.now()
 
 current_time = now.strftime("%H:%M:%S")
 
-plt.savefig('Plots/'+current_time + '.pdf')
+plt.savefig('plots/'+current_time + '.png')
 '''

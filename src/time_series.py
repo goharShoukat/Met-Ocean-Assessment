@@ -29,7 +29,7 @@ def time_series_plot(df, variable, Coordinates, unit, plot_direc):
     right = max((df['Date']))
     
     
-    fig, ax = plt.subplots(figsize=(60,60))
+    fig, ax = plt.subplots(figsize = (60,60))
     ax.xaxis.set_major_locator(mdates.YearLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("\n%Y"))
     loc = MultipleLocator(base=1.0)
@@ -55,6 +55,7 @@ def time_series_plot(df, variable, Coordinates, unit, plot_direc):
     plt.text(0.93, 0.80, 'Maximum \n{:.2f}'.format(np.max(df[variable])), fontsize=9, transform=plt.gcf().transFigure)
     plt.text(0.87, 0.73, 'Std \n{:.2f}'.format(np.std(df[variable])), fontsize=9, transform=plt.gcf().transFigure)
     plt.savefig(plot_direc + '{} Time Series.pdf'.format(variable))
+    plt.close()
 
 '''
 

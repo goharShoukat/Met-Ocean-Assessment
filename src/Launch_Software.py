@@ -18,6 +18,7 @@ import pandas as pd
 from run_code import run_script
 from freq_occurence import frequency_occurence
 from time_series import time_series_plot
+from tables import tables_monthly_summary
 import os
 
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
@@ -69,9 +70,14 @@ elif int(option) == 2:
         time_series_plot(df2, 'hmax', Coordinates, units.loc[0,'hmax'], plot_direc)
         
         #pass the normal df to all other functions
+        #plot heatmap for frequency of occurrence for mwp vs swh
         frequency_occurence(df, 'mwp', 'swh', Coordinates, date_range, 'mwp vs swh', list([units.loc[0,'mwp'], units.loc[0,'swh']]), plot_direc)
     
-    print('\nAll Plots were successfully generate and saved in the specified directory.')
+        #form summary tables - monthly
+        tables_monthly_summary(df2, 'swh', 'mwp', 'hmax', units, Coordinates, date_range, plot_direc)
+        #yearly summary tables - first 20 years and then the next 20 years
+        
+    print('\nAll Plots were successfully generated and saved in the specified directory.')
    
     #permenantly removes cache file
     os.remove('cache.csv')
