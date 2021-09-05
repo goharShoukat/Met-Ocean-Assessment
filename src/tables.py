@@ -150,21 +150,21 @@ def tables_yearly_summary_first_20(df, variable1, variable2, variable3, units,
     header[0].visible_edges = "TBL"
     header[1].visible_edges = "TB"
     header[2].visible_edges = "TBR"
-    header[1].get_text().set_text("$\\bf{}$".format(variable1 + ' (' + units[variable1] + ')'))
+    header[1].get_text().set_text("$\\bf{}$".format(variable1 + ' (' + units.loc[0, variable1] + ')'))
     
     
     header2 = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos in [4,5, 6]]
     header2[0].visible_edges = "TBL"
     header2[1].visible_edges = "TB"
     header2[2].visible_edges = "TBR"
-    header2[1].get_text().set_text("$\\bf{}$".format(variable2 + ' (' + units[variable2] + ')'))
+    header2[1].get_text().set_text("$\\bf{}$".format(variable2 + ' (' + units.loc[0, variable2] + ')'))
     
     
     header3 = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos in [7,8, 9]]
     header3[0].visible_edges = "TBL"
     header3[1].visible_edges = "TB"
     header3[2].visible_edges = "TBR"
-    header3[1].get_text().set_text("$\\bf{}$".format(variable3 + ' (' + units[variable3] + ')'))
+    header3[1].get_text().set_text("$\\bf{}$".format(variable3 + ' (' + units.loc[0, variable3] + ')'))
     plt.axis('off')
     plt.rcParams['axes.titley'] = .9   # y is in axes-relative coordinates.
     ax.set_title('rcParam y')
@@ -227,21 +227,21 @@ def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units,
     header[0].visible_edges = "TBL"
     header[1].visible_edges = "TB"
     header[2].visible_edges = "TBR"
-    header[1].get_text().set_text("$\\bf{}$".format(variable1 + ' (' + units[variable1] + ')'))
+    header[1].get_text().set_text("$\\bf{}$".format(variable1 + ' (' + units.loc[0, variable1] + ')'))
     
     
     header2 = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos in [4,5, 6]]
     header2[0].visible_edges = "TBL"
     header2[1].visible_edges = "TB"
     header2[2].visible_edges = "TBR"
-    header2[1].get_text().set_text("$\\bf{}$".format(variable2 + ' (' + units[variable2] + ')' ))
+    header2[1].get_text().set_text("$\\bf{}$".format(variable2 + ' (' + units.loc[0, variable2] + ')' ))
     
     
     header3 = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos in [7,8, 9]]
     header3[0].visible_edges = "TBL"
     header3[1].visible_edges = "TB"
     header3[2].visible_edges = "TBR"
-    header3[1].get_text().set_text("$\\bf{}$".format(variable3 + ' (' + units[variable3] + ')'))
+    header3[1].get_text().set_text("$\\bf{}$".format(variable3 + ' (' + units.loc[0, variable3] + ')'))
     plt.axis('off')
     plt.rcParams['axes.titley'] = .9   # y is in axes-relative coordinates.
     ax.set_title('rcParam y')

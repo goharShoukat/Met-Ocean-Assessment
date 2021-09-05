@@ -12,14 +12,14 @@ It only function with default settings.
 
 
 """
-
+import os
 import numpy as np
 import pandas as pd
 from run_code import run_script
 from freq_occurence import frequency_occurence
 from time_series import time_series_plot
 from tables import tables_monthly_summary, tables_yearly_summary_first_20, tables_yearly_summary_last_20
-import os
+from contour_plots import contours
 
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
 print('Before proceeding, please choose from amongst the 3 different options available to you:\n\n')
@@ -86,6 +86,9 @@ elif int(option) == 2:
    
             tables_yearly_summary_last_20(df2, 'swh', 'mwp',
                                  'hmax', units, Coordinates, date_range, plot_direc)
+            
+        #plot contours, gaussian kdes for swh vs mwp
+        contours(df2, 'swh', 'mwp', units, Coordinates, date_range, plot_direc)
    
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
