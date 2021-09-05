@@ -18,7 +18,7 @@ import pandas as pd
 from run_code import run_script
 from freq_occurence import frequency_occurence
 from time_series import time_series_plot
-from tables import tables_monthly_summary
+from tables import tables_monthly_summary, tables_yearly_summary_first_20, tables_yearly_summary_last_20
 import os
 
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
@@ -76,7 +76,17 @@ elif int(option) == 2:
         #form summary tables - monthly
         tables_monthly_summary(df2, 'swh', 'mwp', 'hmax', units, Coordinates, date_range, plot_direc)
         #yearly summary tables - first 20 years and then the next 20 years
+        #first check number of years. if greater than 20, divide into 2 blocks
         
+        if (int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year)) == 40:
+            #we will assume a 40 year duration
+            
+            tables_yearly_summary_first_20(df2, 'swh', 'mwp',
+                                  'hmax', units, Coordinates, date_range, plot_direc)
+   
+            tables_yearly_summary_last_20(df2, 'swh', 'mwp',
+                                 'hmax', units, Coordinates, date_range, plot_direc)
+   
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
     #permenantly removes cache file
