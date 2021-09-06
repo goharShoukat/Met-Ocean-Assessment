@@ -31,7 +31,7 @@ from Wave_Rose import wave_rose
 from EVA import EVA
 
 from wind_vel_direction_calc import wind_calc #calculates wind speed and direction necessary for all other wind graphs
-
+from wind_rose import wind_rose
 
 
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
@@ -175,8 +175,12 @@ elif int(option) == 3:
             tables_wind_yearly_lessthan_20(df2, 'Velocity', units, date_range, Coordinates, plot_direc)
         else:
             pass
+        
+        #plotting of wind roses for velocity
+        wind_rose(df2, 'Bearing', 'Velocity', units, Coordinates, date_range, plot_direc)
         #Extreme Value analysis
         EVA(df2, 'Velocity', Coordinates, date_range, plot_direc)
+        
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
     #permenantly removes cache file

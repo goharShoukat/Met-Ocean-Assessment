@@ -37,7 +37,7 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
     #Coordinates : str : The coordinates for which this data is extracted
     #date_range : str : The date interval for which this data corresponds to
     #title : str : title of the plot e.g. mwp vs swh
-    #units : list : list of two elements. units[0] = unit of x, units[1] = unit of y
+    #units : pd.DataFrame : df contains units of respective variables
     #direc : str : output directory entered by user
     #output:
         #Frequency of Occurence Plot of the two specified quantities
@@ -108,8 +108,7 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
     mask[-2:, :] = True
     mask[:, -2:] = True
     
-    
-    fig = plt.figure(figsize = (30,30))
+    fig = plt.figure(figsize=(30,30))
     #x and y labels are reversed to change orientation of the curve
     
     #mask all elements except the last row and last column
@@ -128,7 +127,6 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
     mask3[np.shape(counts)[0]-1, np.shape(counts)[1]-1] = True#remove the 0s at the end of the two rows and columns
     mask3[np.shape(counts)[0]-1, np.shape(counts)[1]-1-1] = True
     mask3[np.shape(counts)[0]-1-1, np.shape(counts)[1]-1] = True
-
     
     ax = sns.heatmap(counts, annot = True, linewidths=0.5, mask = mask,\
                      cbar = False, xticklabels=ynew, yticklabels=xnew, annot_kws={"size": 'small'})
@@ -153,15 +151,12 @@ def frequency_occurence(df, x_variable, y_variable, Coordinates, date_range, tit
         if (a == 0):
             t.set_text('{:.0f}'.format(a))
     
-    
-    
-    
+
     plt.tick_params('both', bottom=False, left=False)
     plt.ylabel(x_variable + ' (' + units[0] + ')')
     plt.xlabel(y_variable + ' (' + units[1] + ')')
     plt.xticks(rotation=70)
     plt.title('{}\nFrequency of Occurrence ({}): {}'.format(Coordinates, title, date_range))
-    
     fig.tight_layout()
     plt.savefig(direc + 'Heatmap ' + title + '.pdf')
     plt.close()

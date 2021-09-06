@@ -4,6 +4,10 @@
 Created on Wed Jul 28 23:11:15 2021
 
 @author: goharshoukat
+
+this script is modified source code of the original windrose.py.
+
+it is modified to plot wave roses only. windroses have different thresholds
 """
 
 #!/usr/bin/env python

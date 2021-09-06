@@ -39,16 +39,18 @@ def wave_rose(df, var_direction, variable, units, Coordinates, date_range, direc
     bins = np.arange(1, 6, 1)
     bins = np.append(bins, 6)
     ax = WindroseAxes.from_ax()
-    #circle1 = plt.Circle((0, 0), 5,  transform=ax.transData._b, color='white', fill=True)
+    #cmap can be adjusted. default is also good. 
     ax.bar(df[var_direction].to_numpy(), df[variable].to_numpy(), bins = bins,normed = True, 
-           opening=0.8,edgecolor='gray',lw=0.1)
+           opening=0.8,edgecolor='gray',lw=0.1, cmap = cm.Spectral_r)
     
     ax.set_thetagrids(range(0,360,45), [90, 45, 0, 315, 270, 225, 180, 135])
     ax.set_theta_zero_location('W', offset=-180)
     ax.set_xticklabels(['E', 'NE', 'N', 'NW',  'W', 'SW', 'S', 'SE'])
     #ax.add_patch(circle1)
     ax.set_rorigin(-2)
-    t = plt.text(-2., -2., "Calm", size=9, ha="center", va="center", bbox=dict(boxstyle="circle", facecolor = 'white') )
+    t = plt.text(-2., -2., "Calm", size=9, ha="center", va="center",
+                 bbox=dict(boxstyle="circle", facecolor = 'white', 
+                           edgecolor = 'white'))
     leg_title = (variable + '(' + units.loc[0, variable] + ')')
     #t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
     ax.set_legend(title = leg_title, bbox_to_anchor = (1, 0.1))

@@ -448,9 +448,9 @@ def tables_wind_yearly_first_20(df, variable1, units, Coordinates, date_range, d
     plt.close()
     
 def tables_wind_yearly_last_20(df, variable1, units, Coordinates, date_range, direc):
-                #input
+
+            #input
     #df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
-  
     #so two seperate figures for years will be made of 20 years each
     #variable1 : str : one of the variables found in the df
     #variable2 : str : one of the variables found in the df
@@ -462,19 +462,19 @@ def tables_wind_yearly_last_20(df, variable1, units, Coordinates, date_range, di
 
     
     yearly_mean = pd.DataFrame()
-    yearly_mean[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.5), 2)[20:]
-    
+    yearly_mean[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.5), 2)[:20]
+     
     
     yearly_min = pd.DataFrame()
-    yearly_min[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.05), 2)[21:]
+    yearly_min[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.05), 2)[:20]
     
     yearly_max = pd.DataFrame()
-    yearly_max[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.95), 2)[21:]
-   
+    yearly_max[variable1] = np.round(df.groupby([df['Date'].dt.year.rename('yearly')])[variable1].quantile(0.95), 2)[:20]
+    
     
     yearly_list = np.array(np.linspace(1979, 1999, 20),dtype=object).astype(int)
     
-    yearly= np.array([yearly_list, yearly_mean[variable1], yearly_min[variable1], yearly_max[variable1]],dtype=object).T
+    yearly= np.array([yearly_list, yearly_mean[variable1], yearly_min[variable1], yearly_max[variable1]], dtype=object).T
     
     
     
@@ -496,15 +496,13 @@ def tables_wind_yearly_last_20(df, variable1, units, Coordinates, date_range, di
     header[1].visible_edges = "TB"
     header[2].visible_edges = "TBR"
     header[1].get_text().set_text("$\\bf{}$".format(variable1 + ' (' + units.loc[0, variable1] + ')'))
-    
-    
     plt.axis('off')
     plt.rcParams['axes.titley'] = .9   # y is in axes-relative coordinates.
     ax.set_title('rcParam y')
     ax.set_title('{}\nYearly Percentiles: {}'.format(Coordinates, date_range))
     plt.tight_layout()
     plt.savefig(direc + 'summary_table_wind_yearly2.pdf')
-    plt.close()
+    #plt.close()
      
 def tables_wind_yearly_lessthan_20(df, variable1, units, Coordinates, date_range, direc):
                 #input

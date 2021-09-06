@@ -4,6 +4,8 @@
 Created on Wed Jul 28 23:11:15 2021
 
 @author: goharshoukat
+
+this script is modified to plot windroses, not wave roses. the calm circle thresholds are different
 """
 
 #!/usr/bin/env python
@@ -142,7 +144,7 @@ class WindroseAxes(PolarAxes):
             fmt = "%d"
         else:
             fmt = "%.1f"
-        radii_labels = [fmt % r for r in radii]
+        radii_labels = [(fmt % r) + '%' for r in radii]
         # radii_labels[0] = ""  # Removing label 0
         self.set_rgrids(
             radii=radii[1:], labels=radii_labels[1:], angle=self.radii_angle, **kwargs
@@ -223,8 +225,8 @@ class WindroseAxes(PolarAxes):
             #    fmt += ' ' + units
 
             labels = [fmt % (labels[i], labels[i + 1]) for i in range(len(labels) - 1)]
-            labels[len(labels) -1] = '>= 6 (0.67 %)'
-            labels.insert(0, '<1 (17.51%)')
+            labels[len(labels) -1] = '>= 22 ({} %)'.format(self.percent_vel_above_22)
+            labels.insert(0, '< 5 ({} %)'.format(self.percent_vel_below_5))
             return labels
 
         kwargs.pop("labels", None)
@@ -548,7 +550,9 @@ class WindroseAxes(PolarAxes):
         opening = dtheta * opening
 
         offs = self._calm_circle()
-
+        self.percent_vel_below_5 = round(len(var[var < 5]) / len(var) * 100, 2)
+        self.percent_vel_above_22 = round(len(var[var > 22]) / len(var) * 100, 2)
+        
         for j in range(nsector):
             offset = offs
             for i in range(nbins):

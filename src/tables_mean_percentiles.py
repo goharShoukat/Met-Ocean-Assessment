@@ -23,8 +23,8 @@ from matplotlib.font_manager import FontProperties
 
 
 
-direc = 'tests/results/'
-df = pd.read_csv(direc + '07_29-02_08_PM.csv', index_col = False)
+direc = 'results/'
+df = pd.read_csv(direc + '09_05-03_28_PM.csv', index_col = False)
 df['Date'] = pd.to_datetime(df['Date'])
 
 # %% Monthly Summary 
@@ -50,9 +50,9 @@ months_list = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'O
 month= np.array([months_list, month_mean['swh'], month_min['swh'], month_max['swh'], month_mean['hmax'], month_min['hmax'], month_max['hmax'], month_mean['mwp'], month_min['mwp'], month_max['mwp']]).T
 
 
-
-fig = plt.figure(figsize = (60,60))
-table = plt.table(cellText=month, colLabels=['Months', '50th %', '5th %', '95th %', '50th %', '5th %', '95th %', '50th %', '5th %', '95th %'],loc='center', 
+variable1 = 'Hs (m)'
+fig, ax = plt.subplots(1,1, figsize=(30,30))
+table = ax.table(cellText=month, colLabels=['Months', '50th %', '5th %', '95th %', '50th %', '5th %', '95th %', '50th %', '5th %', '95th %'],loc='center', 
                   cellLoc='center')
 
 h = table.get_celld()[(0,0)].get_height()
@@ -68,7 +68,7 @@ header = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos i
 header[0].visible_edges = "TBL"
 header[1].visible_edges = "TB"
 header[2].visible_edges = "TBR"
-header[1].get_text().set_text("$\\bf{Hs (m)}$")
+header[1].get_text().set_text("$\\bf{}$".format(variable1))
 
 header2 = [table.add_cell(-1,pos, w, h, loc="center", facecolor="none") for pos in [4,5, 6]]
 header2[0].visible_edges = "TBL"
@@ -83,7 +83,11 @@ header3[1].visible_edges = "TB"
 header3[2].visible_edges = "TBR"
 header3[1].get_text().set_text("$\\bf{Tp (s)}$")
 plt.axis('off')
+plt.rcParams['axes.titley'] = .80   # y is in axes-relative coordinates.
+ax.set_title('rcParam y')
+ax.set_title('\nMonthly Percentiles')
 plt.tight_layout()
+
 plt.savefig('Plots/Monthly_Percentiles.pdf')
 
 
