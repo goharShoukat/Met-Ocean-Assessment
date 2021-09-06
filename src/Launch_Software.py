@@ -20,7 +20,8 @@ from freq_occurence import frequency_occurence
 from time_series import time_series_plot
 from tables import tables_monthly_summary, tables_yearly_summary_first_20, tables_yearly_summary_last_20
 from contour_plots import contours
-
+from Wave_Rose import wave_rose
+from EVA import EVA
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
 print('Before proceeding, please choose from amongst the 3 different options available to you:\n\n')
 print('1. Extract data for variables of choice at a specified location.\n')
@@ -89,7 +90,13 @@ elif int(option) == 2:
             
         #plot contours, gaussian kdes for swh vs mwp
         contours(df2, 'swh', 'mwp', units, Coordinates, date_range, plot_direc)
-   
+        
+        #plot wave rose diagrams for swh
+        wave_rose(df2, 'mwd', 'swh', units, Coordinates, date_range, plot_direc)
+        
+        #GEV Extreme Value Analysis
+        EVA(df2, 'swh', Coordinates, date_range, plot_direc)
+        EVA(df2, 'hmax', Coordinates, date_range, plot_direc)
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
     #permenantly removes cache file
