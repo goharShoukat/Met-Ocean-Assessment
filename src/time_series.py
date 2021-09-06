@@ -45,6 +45,8 @@ def time_series_plot(df, variable, Coordinates, unit, plot_direc):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.95, box.height])
     ax.grid(b = True, which = 'both', linestyle= '--')
+    if variable == 'Bearing':
+        ax.yaxis.set_ticks(np.arange(0, 360, 30))
     
     
     #plt.text(0.5, 0.5, 'matplotlib', ha='right', va='top', transform=ax.transAxes)
