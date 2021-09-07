@@ -22,16 +22,17 @@ the date issue remains unresolved. a cache file is being used. its unelegent but
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from run_code import run_script
-from freq_occurence import frequency_occurence
+from freq_occurence import frequency_occurence, frequency_occurence_wind_direction, frequency_occurence_wave_direction
 from time_series import time_series_plot
 from tables import tables_monthly_summary, tables_yearly_summary_first_20, tables_yearly_summary_last_20, tables_wind_monthly, tables_wind_yearly_first_20, tables_wind_yearly_last_20, tables_wind_yearly_lessthan_20, tables_yearly_summary_lessthan_20
-from contour_plots import contours
-from Wave_Rose import wave_rose
+from contour_plots import contours, contours_direction
+from Wave_Rose import wave_rose, monthly_wave_rose
 from EVA import EVA
 
 from wind_vel_direction_calc import wind_calc #calculates wind speed and direction necessary for all other wind graphs
-from wind_rose import wind_rose
+from wind_rose import wind_rose, monthly_wind_rose
 
 
 print('Welcome! This is a Preliminary Wind & Wave Resource Assessment Tool designed inhouse by GDG.\n\n\n')
@@ -86,13 +87,15 @@ elif int(option) == 2:
         #pass the normal df to all other functions
         #plot heatmap for frequency of occurrence for mwp vs swh
         frequency_occurence(df, 'mwp', 'swh', Coordinates, date_range, 'mwp vs swh', list([units.loc[0,'mwp'], units.loc[0,'swh']]), plot_direc)
-    
+        
+        frequency_occurence_wave_direction(df2, 'mwd', 'swh', Coordinates, date_range, 'Bearing vs swh', list([units.loc[0,'mwd'], units.loc[0,'swh']]), plot_direc)
         #form summary tables - monthly
         tables_monthly_summary(df2, 'swh', 'mwp', 'hmax', units, Coordinates, date_range, plot_direc)
         #yearly summary tables - first 20 years and then the next 20 years
         #first check number of years. if greater than 20, divide into 2 blocks
         
-        if (int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year)) == 40:
+        dt = int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year) + 1
+        if dt == 40:
             #we will assume a 40 year duration
             
             tables_yearly_summary_first_20(df2, 'swh', 'mwp',
@@ -100,20 +103,21 @@ elif int(option) == 2:
    
             tables_yearly_summary_last_20(df2, 'swh', 'mwp',
                                  'hmax', units, Coordinates, date_range, plot_direc)
-        elif (int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year)) < 20:
+        elif dt < 20:
             tables_yearly_summary_lessthan_20(df2, 'swh', 'mwp',
                                  'hmax', units, Coordinates, date_range, plot_direc) 
         else:
             pass
         #plot contours, gaussian kdes for swh vs mwp
         contours(df2, 'swh', 'mwp', units, Coordinates, date_range, plot_direc)
-        
+        contours_direction(df2, 'swh', 'mwd', units, Coordinates, date_range, plot_direc)
         #plot wave rose diagrams for swh
         wave_rose(df2, 'mwd', 'swh', units, Coordinates, date_range, plot_direc)
-        
+        #plot monhtly wave rose as well
+        monthly_wave_rose(df2, 'mwd', 'swh', units, Coordinates, date_range, plot_direc)
         #GEV Extreme Value Analysis
-        EVA(df2, 'swh', Coordinates, date_range, plot_direc)
-        EVA(df2, 'hmax', Coordinates, date_range, plot_direc)
+        EVA(df2, 'swh', dt, Coordinates, date_range, plot_direc)
+        EVA(df2, 'hmax', dt, Coordinates, date_range, plot_direc)
         
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
@@ -167,20 +171,29 @@ elif int(option) == 3:
         
         #summary tables
         tables_wind_monthly(df2, 'Velocity', units, date_range, Coordinates, plot_direc)
-        if (int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year)) == 40:
+        
+        dt = int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year) + 1
+        if dt == 40:
         
             tables_wind_yearly_first_20(df2, 'Velocity', units, date_range, Coordinates, plot_direc)
             tables_wind_yearly_last_20(df2, 'Velocity', units, date_range, Coordinates, plot_direc)
-        elif (int(df2.loc[len(df2)-1, 'Date'].year) - int(df2.loc[0, 'Date'].year)) < 20:
+        elif dt < 20:
             tables_wind_yearly_lessthan_20(df2, 'Velocity', units, date_range, Coordinates, plot_direc)
         else:
             pass
         
+        
+        #frequency of occurence for wind speed and direction
+        frequency_occurence_wind_direction(df2, 'Bearing', 'Velocity', Coordinates, date_range, 'Bearing vs Velocity', list([units.loc[0,'Bearing'], units.loc[0,'Velocity']]), plot_direc)
         #plotting of wind roses for velocity
         wind_rose(df2, 'Bearing', 'Velocity', units, Coordinates, date_range, plot_direc)
+        #monthly wind rose
+        monthly_wind_rose(df2, 'Bearing', 'Velocity', units, Coordinates, date_range, plot_direc)
         #Extreme Value analysis
-        EVA(df2, 'Velocity', Coordinates, date_range, plot_direc)
+        EVA(df2, 'Velocity', dt, Coordinates, date_range, plot_direc)
         
+        #contour plots
+        contours_direction(df2, 'Velocity', 'Bearing', units, Coordinates, date_range, plot_direc)
     print('\nAll Plots were successfully generated and saved in the specified directory.')
    
     #permenantly removes cache file

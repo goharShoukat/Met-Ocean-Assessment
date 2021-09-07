@@ -13,20 +13,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scikit.skextremes as ske
 
-def EVA(df, variable, Coordinates, date_range, direc):
+def EVA(df, variable, dt, Coordinates, date_range, direc):
     #inputs
     #df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
     #variable: str : x variable name for the EVA. like swh
+    #dt : int : number of years of data
     #Coordinates : str : The coordinates for which this data is extracted
     #date_range : str : The date interval for which this data corresponds to
     #title : str : title of the plot e.g. mwp vs swh
     #direc : str : output directory entered by user
     sorted_ = np.sort(df[variable])
     #select top 30 events
-    top_20 = sorted_[-20:]
+    top_20 = sorted_[-100:]
         
     model = ske.models.classic.GEV(top_20, fit_method = 'mle', ci = 0.05,
-                                  ci_method = 'delta')
+                                  ci_method = 'delta', frec = dt/len(df))
     model.plot_summary()
     plt.show()
     plt.savefig(direc + variable + ' summary_EVA.pdf')
@@ -59,23 +60,27 @@ def EVA(df, variable, Coordinates, date_range, direc):
     plt.savefig(direc + variable + ' plot_density.pdf')
     plt.close()
     
+    
 
-    '''
+'''
+#top_30 = np.round(top_30, 2)
+#np.savetxt('top100.txt', top_30, delimiter=',')
 
 direc = 'results/'
-df = pd.read_csv(direc + '09_06-12_12_PM.csv', index_col = False)
+df = pd.read_csv(direc + '09_07-04_57_PM.csv', index_col = False)
 df['Date'] = pd.to_datetime(df["Date"])
 
 
 sorted_ = np.sort(df['swh (m)'])#sort the array
 #select the top 30 maximum events
-top_30 = sorted_[-25:]
+top_30 = sorted_[-100:]
 
+rv = (pd.read_csv('ReturnPeriod.txt', header = None)).astype(List)
 model = ske.models.classic.GEV(top_30, fit_method = 'mle', ci = 0.05,
                               ci_method = 'delta')
 
 
- model.plot_summary()
+model.plot_summary()
 
 
 plt.show()

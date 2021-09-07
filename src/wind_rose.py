@@ -49,13 +49,59 @@ def wind_rose(df, var_direction, variable, units, Coordinates, date_range, direc
                            edgecolor = 'white'))
     leg_title = (variable + '(' + units.loc[0, variable] + ')')
     #t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
-    ax.set_legend(title = leg_title, bbox_to_anchor = (1, 0.1))
+    ax.set_legend(title = leg_title, bbox_to_anchor = (1.2, 0.1))
     mpl.rcParams.update(mpl.rcParamsDefault)
-    ax.set_title('{}\nWind Rose Diagram - {}'.format(Coordinates, date_range))
+    ax.set_title('{}\nWind Rose Diagram - {}\n'.format(Coordinates, date_range))
     plt.show()
     plt.savefig(direc + variable + ' wind rose.pdf')
     plt.close()
 
+
+def monthly_wind_rose(df, var_direction, variable, units, Coordinates, date_range, direc):
+    #function to generate montly wave roses
+    #inputs
+    #df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+    #var_direction: str : for wave roses, this is mwd
+    #variable: str : input variable name like swh
+    #Coordinates : str : The coordinates for which this data is extracted
+    #date_range : str : The date interval for which this data corresponds to
+    #units : pd.DataFrame : df of units with columns as variable names
+    #direc : str : output directory entered by user
+    
+    bins = np.arange(5, 22, 1)
+    
+    
+    #declare an array of int to to specify the months
+    months = np.linspace(1,12,12).astype(int) #for data filtering using datetime
+    #specify month names to be put in the title
+    columns = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 
+                                  'Oct', 'Nov', 'Dec']
+
+    #loop to extract monthly dataframes and plot them, save them
+    for m, col in zip(months, columns):
+        month_df = df[df['Date'].dt.month==m].reset_index(drop=True)
+        
+        
+        ax = WindroseAxes.from_ax()
+        ax.bar( month_df[var_direction].to_numpy(),  month_df[variable].to_numpy(), bins = bins,normed = True, 
+           opening=0.8,edgecolor='gray',lw=0.1, cmap = cm.Spectral_r)
+    
+        ax.set_thetagrids(range(0,360,45), [90, 45, 0, 315, 270, 225, 180, 135])
+        ax.set_theta_zero_location('W', offset=-180)
+        ax.set_xticklabels(['E', 'NE', 'N', 'NW',  'W', 'SW', 'S', 'SE'])
+        #ax.add_patch(circle1)
+        ax.set_rorigin(-1.5)
+        t = plt.text(-1.5, -1.5, "Calm", size=12, ha="center", va="center", 
+                 bbox=dict(boxstyle="circle", facecolor = 'white', 
+                           edgecolor = 'white'))
+        leg_title = (variable + '(' + units.loc[0, variable] + ')')
+        #t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
+        ax.set_legend(title = leg_title, bbox_to_anchor = (1.2, 0.1))
+        mpl.rcParams.update(mpl.rcParamsDefault)
+        ax.set_title('{}\n{} Wave Rose Diagram - {}'.format(Coordinates, col, date_range))
+        plt.show()
+        plt.savefig(direc + variable +' ' + col + '_' + ' wind rose.pdf')
+        plt.close()
     
 '''
 def bearing(vector):
