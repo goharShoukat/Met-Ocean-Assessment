@@ -23,7 +23,7 @@ Please be warned that downloading and installing libraries from Spyder's termina
 
 The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
 
-## Version 0:
+## Version 0 Beta - Part 1:
 This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. The following inputs are required:
 - Directory housing the ERA5 datasets
 
@@ -243,3 +243,37 @@ The code is designed to run on a signle core. Parallel processing can be added, 
 
 ### Indices vs Actual Values
 Those reading the code or the documentation might ask why have we used the indices of the coordinates instead of the actual values. While this might be confusing for the user, it is more convenient to design the algorithm by referencing the memory where the actual value is stored. We make use of this memory address and develop the code around that. Python, unlike C++, does not have a pointer or direct memory referencing functionality, to get around that, we make use of the indices. By passing indices and self referencing them throughout the code, we can structure the code much more efficiently. 
+
+
+
+
+## Version 0 Beta - Part 2:
+The plotting part of the algorithm makes use of almost all the libraries previously installed for Part 1. However, there are two additional library that needs to be installed to run the default plotting algorithm:
+
+- skextremes: To install this library, follow the instructions below. Enter the directory where the src folder is located. 
+	- pip install git+https://github.com/OpenHydrology/lmoments3.git
+	
+	- git clone https://github.com/kikocorreoso/scikit-extremes.git
+	
+	Then go to the directory where the source code for scikit-extremes is downloaded and rename the file from scikit-extremes to scikit.
+	
+	- cd scikit
+	
+	- pip install -e .
+	
+Please note that the above commands are executed in the terminal. In case you don't know how to enter the directory from the terminal, please follow the next few steps, otherwise, ignore and move on to the next part:
+
+- Move the full cloned folder to a location of your choice, here we will assume it is the Documents folder. 
+- Open the terminal and write:
+	- cd Documents/Met-Ocean-Assessment/src
+	- pip install git+https://github.com/OpenHydrology/lmoments3.git
+	- git clone https://github.com/kikocorreoso/scikit-extremes.git
+	- Rename the folder cloned manually from scikit-extremes to scikit and revert back to the terminal
+	- cd scikit
+	- pip install -e
+	
+This will complete the installation of the library. If any further errors come up, please inform the developers. 
+	
+- seaborne: 
+	pip install seaborn
+
