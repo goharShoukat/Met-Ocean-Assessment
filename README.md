@@ -274,6 +274,26 @@ Please note that the above commands are executed in the terminal. In case you do
 	
 This will complete the installation of the library. If any further errors come up, please inform the developers. 
 	
-- seaborne: 
+- seaborne:
+ 
 	pip install seaborn
+
+- numdiftools:
+
+	pip install numdifftools
+	
+
+## Libraries available for Plotting
+
+- Time Series Plots
+- Frequency of Occurrence Plots
+- KDE Gaussian Scatter Plot with Heatmap
+- KDE Gaussian Contour Plot
+- GEV based Extreme Value Analysis
+- Summary Table Generation
+- Wind & Wave Rose Diagrams with option to plot monthly rose diagrams
+
+
+The above are scripted individually and are standalone functions. They can be used to develop a personal routine and can be used for other data sets as well, as long as the column requirements are fulfilled. These plots are available for both wind and wave data series. We will now discuss the data input and output of each one of these functions. 
+
 
