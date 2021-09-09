@@ -297,3 +297,127 @@ This will complete the installation of the library. If any further errors come u
 The above are scripted individually and are standalone functions. They can be used to develop a personal routine and can be used for other data sets as well, as long as the column requirements are fulfilled. These plots are available for both wind and wave data series. We will now discuss the data input and output of each one of these functions. 
 
 
+## Code Documentation
+
+This following function is in the script time_series.py
+
+
+- def time_series_plot(df, variable, Coordinates, unit, plot_direc):
+	
+    This function plots the time series plots and annotates the data statistics towards the top right corner. 
+    
+    The function takes the following inputs:
+    
+
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+	    
+	    - x_variable: str : x variable name for the heatmap. like mwp
+	    
+	    - y_variable: ndarray : input array like swh
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+    	    - date_range : str : The date interval for which this data corresponds to
+
+    	    - units : pd.DataFrame : df of units with columns as variable names
+    	    
+    	    - plot_direc : str : output directory entered by user
+   
+
+These functions are in the script tables.py
+
+
+- def tables_monthly_summary(df, variable1, variable2, variable3, units, 
+                           Coordinates, date_range, direc):
+    
+    This particular function sorts the data month wise and then plots percentiles in a neat tabular form. This function is specifically for wave data. Wind data has seperate set of functions. The processing remains the same, the plotting changes from 3 columns in waves to 1 columns. We will go into more detail of that later. The following are the inputs this function takes:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+	    
+	    - variable2 : str : one of the variables found in the df
+	    
+	    - variable3 : str : one of the variables found in the df
+	    
+	    - units : pd.DataFrame : df of units with columns as variable names
+	    
+	    - Coordinates : str : The coordinates for which this data is extracted
+	    
+	    - date_range : str : The date interval for which this data corresponds to
+	    
+	    - direc : str : directory to save the tables
+
+
+- def tables_yearly_summary_first_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc, key = False):
+      
+    This function should be used when the total number of data available is more than 20 years and more specifically about 40 years in total. This functin is used in conjuction with the function mentioned immediately below this one. The inputs for this function are as follows:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+
+
+def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc):
+    
+    This function, which has to be used in conjuctino with the previous function, generates the tables for the remaining 20 years of data. One figure cant fit in the whole 40 years so this was broken into 2 different blocks. The inputs of this function are:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+
+
+def tables_yearly_summary_lessthan_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc):
+			  
+	
+  	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
