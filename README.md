@@ -375,7 +375,7 @@ These functions are in the script tables.py
 	    - key : str/int : normally False but if 1 or 2, sets up multiple 
 
 
-def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units, 
+- def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units, 
                           Coordinates, date_range, direc):
     
     This function, which has to be used in conjuctino with the previous function, generates the tables for the remaining 20 years of data. One figure cant fit in the whole 40 years so this was broken into 2 different blocks. The inputs of this function are:
@@ -400,7 +400,7 @@ def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units,
 	    - key : str/int : normally False but if 1 or 2, sets up multiple 
 
 
-def tables_yearly_summary_lessthan_20(df, variable1, variable2, variable3, units, 
+- def tables_yearly_summary_lessthan_20(df, variable1, variable2, variable3, units, 
                           Coordinates, date_range, direc):
 			  
 	
@@ -421,3 +421,66 @@ def tables_yearly_summary_lessthan_20(df, variable1, variable2, variable3, units
 	    - direc : str : directory to save the tables
 
 	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+	    
+
+The following functions can be accessed in the script wave roses:
+- def wave_rose(df, var_direction, variable, units, Coordinates, date_range, direc):
+    
+    
+    This function plots the wave diagrams with customised labels and a calm circle in the middle. Please note that the limits for calm and over 6m are hard coded and can be adjusted in the script windRose_waves.py in lines 555 and 556 of the script. 
+    
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+	    
+	    - var_direction: str : for wave roses, this is mwd
+	    
+	    - variable: str : input variable name like swh
+	    
+	    - Coordinates : str : The coordinates for which this data is extracted
+	    
+	    - date_range : str : The date interval for which this data corresponds to
+	    
+	    - units : pd.DataFrame : df of units with columns as variable names
+	    
+	    - direc : str : output directory entered by user
+
+
+- def contours(df, variable1, variable2, units, Coordinates, date_range, direc):
+   
+   This function generates contours and scatter plots based on Gaussian Kernel Density Estimation. Its recommended to use on wave variables like plotting mwp vs swh
+
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+
+	    - variable1: str : variable name - x variable like swh
+
+	    - variable2: str : variable name - y variable like mwp
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - units : pd.DataFrame : df contains units of respective variables
+
+	     - direc : str : output directory entered by user
+
+
+- def contours_direction(df, variable1, variable2, units, Coordinates, date_range, direc):
+    
+    This function takes in similar inputs as the previous one, with one exception, it is modified to adjust for directional bins. The previous function would provide poor results if direction related variables like mwd or bearing are passed on to it. 
+    
+   
+    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+    
+    - variable1: str : variable name - x variable like swh
+    
+    - variable2: str : variable name - y variable like mwd
+    
+    - Coordinates : str : The coordinates for which this data is extracted
+    
+    - date_range : str : The date interval for which this data corresponds to
+    
+    - units : pd.DataFrame : df contains units of respective variables
+    
+    - direc : str : output directory entered by user
+
+
+
