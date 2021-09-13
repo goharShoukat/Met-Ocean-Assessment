@@ -1,16 +1,21 @@
 # Met Ocean Assessment 
 This tool is designed to automate the process of met ocean assessments for a site's energy resource assessment and to provide a starting point for a more detailed analyses. The user can clone the repository using the following command from the terminal: 
+
+
 git clone https://github.com/goharShoukat/Met-Ocean-Assessment.git
-The above command can work if git is installed. This is the recommended cloning methodology as the users can get very conveniently download any updates to the software. The other optino is to manually clone the repository through github itself. On the top right corner, there is an option to clone the repository. Any updates to the software will have to be downloaded manually as well which can be quite cumbersome. 
+
+
+The above command can work if git is installed. This is the recommended cloning methodology as the users can get very conveniently download any updates to the software. The other option is to manually clone the repository through github itself. On the top right corner, there is an option to clone the repository. Any updates to the software will have to be downloaded manually as well which can be quite cumbersome. 
 
 Occasionaly, use the command from your terminal after entering the folder where the repositor was cloned:
-git pull.
+
+git pull
+
 This automatically updates the library and provides all new functionalities that the contributors have included. For the two commands stated above to work with the terminal, 'git' has to be installed in your system. If it isn't, then manually clone the repository from Github. This however means that every time you wish to sync the repository with the source code, a manual download will be required which can lead to loss of old data files.  
 
 This tool is designed to run with Python 3.7 and above. The following additional  libraries are needed to successfully run this program:
 - Netfcdf4
 - Cartopy
-- PyQt5
 - datetime
 - haversine
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
@@ -482,5 +487,27 @@ The following functions can be accessed in the script wave roses:
     
     - direc : str : output directory entered by user
 
+
+
+All the functions above will function for wind as well apart from the Rose Diagrams. They are modified specifically for wind variables. We will mention them now. 
+
+- def wind_rose(df, var_direction, variable, units, Coordinates, date_range, direc):
+	
+	This funtion plots the wind rose diagram and hardcodes winds with less than 5m/s magnitude in the calm region. It also customises the labels. These can be altered by editing the values in line 555 and 556 of the script windRose_wind.py
+	
+	
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+
+	    - var_direction: str : for wave roses, this is mwd
+
+	    - variable: str : input variable name like swh
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - direc : str : output directory entered by user
 
 
