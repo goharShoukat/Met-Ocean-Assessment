@@ -1,16 +1,21 @@
 # Met Ocean Assessment 
 This tool is designed to automate the process of met ocean assessments for a site's energy resource assessment and to provide a starting point for a more detailed analyses. The user can clone the repository using the following command from the terminal: 
+
+
 git clone https://github.com/goharShoukat/Met-Ocean-Assessment.git
-The above command can work if git is installed. This is the recommended cloning methodology as the users can get very conveniently download any updates to the software. The other optino is to manually clone the repository through github itself. On the top right corner, there is an option to clone the repository. Any updates to the software will have to be downloaded manually as well which can be quite cumbersome. 
+
+
+The above command can work if git is installed. This is the recommended cloning methodology as the users can get very conveniently download any updates to the software. The other option is to manually clone the repository through github itself. On the top right corner, there is an option to clone the repository. Any updates to the software will have to be downloaded manually as well which can be quite cumbersome. 
 
 Occasionaly, use the command from your terminal after entering the folder where the repositor was cloned:
-git pull.
+
+git pull
+
 This automatically updates the library and provides all new functionalities that the contributors have included. For the two commands stated above to work with the terminal, 'git' has to be installed in your system. If it isn't, then manually clone the repository from Github. This however means that every time you wish to sync the repository with the source code, a manual download will be required which can lead to loss of old data files.  
 
 This tool is designed to run with Python 3.7 and above. The following additional  libraries are needed to successfully run this program:
 - Netfcdf4
 - Cartopy
-- PyQt5
 - datetime
 - haversine
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
@@ -23,7 +28,7 @@ Please be warned that downloading and installing libraries from Spyder's termina
 
 The tool can be used with both Windows and Mac OS. Any changes to this will be highlighted in the documentation. 
 
-## Version 0:
+## Version 0 Beta - Part 1:
 This is the first release and a test bed. This version will house all the scripts for the assessments. Initially, the user will have to interact with the code by declaring an instance of the class and passing on arguments. The following inputs are required:
 - Directory housing the ERA5 datasets
 
@@ -243,3 +248,266 @@ The code is designed to run on a signle core. Parallel processing can be added, 
 
 ### Indices vs Actual Values
 Those reading the code or the documentation might ask why have we used the indices of the coordinates instead of the actual values. While this might be confusing for the user, it is more convenient to design the algorithm by referencing the memory where the actual value is stored. We make use of this memory address and develop the code around that. Python, unlike C++, does not have a pointer or direct memory referencing functionality, to get around that, we make use of the indices. By passing indices and self referencing them throughout the code, we can structure the code much more efficiently. 
+
+
+
+
+## Version 0 Beta - Part 2:
+The plotting part of the algorithm makes use of almost all the libraries previously installed for Part 1. However, there are two additional library that needs to be installed to run the default plotting algorithm:
+
+- skextremes: To install this library, follow the instructions below. Enter the directory where the src folder is located. 
+	- pip install git+https://github.com/OpenHydrology/lmoments3.git
+	
+	- git clone https://github.com/kikocorreoso/scikit-extremes.git
+	
+	Then go to the directory where the source code for scikit-extremes is downloaded and rename the file from scikit-extremes to scikit.
+	
+	- cd scikit
+	
+	- pip install -e .
+	
+Please note that the above commands are executed in the terminal. In case you don't know how to enter the directory from the terminal, please follow the next few steps, otherwise, ignore and move on to the next part:
+
+- Move the full cloned folder to a location of your choice, here we will assume it is the Documents folder. 
+- Open the terminal and write:
+	- cd Documents/Met-Ocean-Assessment/src
+	- pip install git+https://github.com/OpenHydrology/lmoments3.git
+	- git clone https://github.com/kikocorreoso/scikit-extremes.git
+	- Rename the folder cloned manually from scikit-extremes to scikit and revert back to the terminal
+	- cd scikit
+	- pip install -e
+	
+This will complete the installation of the library. If any further errors come up, please inform the developers. 
+	
+- seaborne:
+ 
+	pip install seaborn
+
+- numdiftools:
+
+	pip install numdifftools
+	
+
+## Libraries available for Plotting
+
+- Time Series Plots
+- Frequency of Occurrence Plots
+- KDE Gaussian Scatter Plot with Heatmap
+- KDE Gaussian Contour Plot
+- GEV based Extreme Value Analysis
+- Summary Table Generation
+- Wind & Wave Rose Diagrams with option to plot monthly rose diagrams
+
+
+The above are scripted individually and are standalone functions. They can be used to develop a personal routine and can be used for other data sets as well, as long as the column requirements are fulfilled. These plots are available for both wind and wave data series. We will now discuss the data input and output of each one of these functions. 
+
+
+## Code Documentation
+
+This following function is in the script time_series.py
+
+
+- def time_series_plot(df, variable, Coordinates, unit, plot_direc):
+	
+    This function plots the time series plots and annotates the data statistics towards the top right corner. 
+    
+    The function takes the following inputs:
+    
+
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+	    
+	    - x_variable: str : x variable name for the heatmap. like mwp
+	    
+	    - y_variable: ndarray : input array like swh
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+    	    - date_range : str : The date interval for which this data corresponds to
+
+    	    - units : pd.DataFrame : df of units with columns as variable names
+    	    
+    	    - plot_direc : str : output directory entered by user
+   
+
+These functions are in the script tables.py
+
+
+- def tables_monthly_summary(df, variable1, variable2, variable3, units, 
+                           Coordinates, date_range, direc):
+    
+    This particular function sorts the data month wise and then plots percentiles in a neat tabular form. This function is specifically for wave data. Wind data has seperate set of functions. The processing remains the same, the plotting changes from 3 columns in waves to 1 columns. We will go into more detail of that later. The following are the inputs this function takes:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+	    
+	    - variable2 : str : one of the variables found in the df
+	    
+	    - variable3 : str : one of the variables found in the df
+	    
+	    - units : pd.DataFrame : df of units with columns as variable names
+	    
+	    - Coordinates : str : The coordinates for which this data is extracted
+	    
+	    - date_range : str : The date interval for which this data corresponds to
+	    
+	    - direc : str : directory to save the tables
+
+
+- def tables_yearly_summary_first_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc, key = False):
+      
+    This function should be used when the total number of data available is more than 20 years and more specifically about 40 years in total. This functin is used in conjuction with the function mentioned immediately below this one. The inputs for this function are as follows:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+
+
+- def tables_yearly_summary_last_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc):
+    
+    This function, which has to be used in conjuctino with the previous function, generates the tables for the remaining 20 years of data. One figure cant fit in the whole 40 years so this was broken into 2 different blocks. The inputs of this function are:
+    
+    
+	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+
+
+- def tables_yearly_summary_lessthan_20(df, variable1, variable2, variable3, units, 
+                          Coordinates, date_range, direc):
+			  
+	
+  	    - df : pd.DataFrame : df with all the columns intact, read from the cache file generated. 
+
+	    - variable1 : str : one of the variables found in the df
+
+	    - variable2 : str : one of the variables found in the df
+
+	    - variable3 : str : one of the variables found in the df
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - direc : str : directory to save the tables
+
+	    - key : str/int : normally False but if 1 or 2, sets up multiple 
+	    
+
+The following functions can be accessed in the script wave roses:
+- def wave_rose(df, var_direction, variable, units, Coordinates, date_range, direc):
+    
+    
+    This function plots the wave diagrams with customised labels and a calm circle in the middle. Please note that the limits for calm and over 6m are hard coded and can be adjusted in the script windRose_waves.py in lines 555 and 556 of the script. 
+    
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+	    
+	    - var_direction: str : for wave roses, this is mwd
+	    
+	    - variable: str : input variable name like swh
+	    
+	    - Coordinates : str : The coordinates for which this data is extracted
+	    
+	    - date_range : str : The date interval for which this data corresponds to
+	    
+	    - units : pd.DataFrame : df of units with columns as variable names
+	    
+	    - direc : str : output directory entered by user
+
+
+- def contours(df, variable1, variable2, units, Coordinates, date_range, direc):
+   
+   This function generates contours and scatter plots based on Gaussian Kernel Density Estimation. Its recommended to use on wave variables like plotting mwp vs swh
+
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+
+	    - variable1: str : variable name - x variable like swh
+
+	    - variable2: str : variable name - y variable like mwp
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - units : pd.DataFrame : df contains units of respective variables
+
+	     - direc : str : output directory entered by user
+
+
+- def contours_direction(df, variable1, variable2, units, Coordinates, date_range, direc):
+    
+    This function takes in similar inputs as the previous one, with one exception, it is modified to adjust for directional bins. The previous function would provide poor results if direction related variables like mwd or bearing are passed on to it. 
+    
+   
+    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+    
+    - variable1: str : variable name - x variable like swh
+    
+    - variable2: str : variable name - y variable like mwd
+    
+    - Coordinates : str : The coordinates for which this data is extracted
+    
+    - date_range : str : The date interval for which this data corresponds to
+    
+    - units : pd.DataFrame : df contains units of respective variables
+    
+    - direc : str : output directory entered by user
+
+
+
+All the functions above will function for wind as well apart from the Rose Diagrams. They are modified specifically for wind variables. We will mention them now. 
+
+- def wind_rose(df, var_direction, variable, units, Coordinates, date_range, direc):
+	
+	This funtion plots the wind rose diagram and hardcodes winds with less than 5m/s magnitude in the calm region. It also customises the labels. These can be altered by editing the values in line 555 and 556 of the script windRose_wind.py
+	
+	
+	    - df : pd.DataFrame : the entire dataframe as it is passed through from the run_code script
+
+	    - var_direction: str : for wave roses, this is mwd
+
+	    - variable: str : input variable name like swh
+
+	    - Coordinates : str : The coordinates for which this data is extracted
+
+	    - date_range : str : The date interval for which this data corresponds to
+
+	    - units : pd.DataFrame : df of units with columns as variable names
+
+	    - direc : str : output directory entered by user
+
+
