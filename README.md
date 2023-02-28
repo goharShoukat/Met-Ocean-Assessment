@@ -19,10 +19,12 @@ This tool is designed to run with Python 3.7 and above. The following additional
 - datetime
 - haversine
 The other libraries required come preinstalled with your Python installation. We recommend you use Anaconda's version of Spyder to use Python. The libraries mentioned above can then be installed using the commands below from spyder's terminal:
-- $ pip install netcdf4
-- $ pip install cartopy
-- $ pip install pyqt5 
-- $ pip install haversine
+- pip install netcdf4
+- pip install cartopy
+- pip install pyqt5 
+- pip install haversine
+- pip install joblib
+- pip install pandas
 
 Please be warned that downloading and installing libraries from Spyder's terminal may break the dependencies of your pre-existing libraries that come with Anaconda. Please open an issue and let us know if this is the case. 
 
@@ -509,5 +511,3 @@ All the functions above will function for wind as well apart from the Rose Diagr
 	    - units : pd.DataFrame : df of units with columns as variable names
 
 	    - direc : str : output directory entered by user
-
-
