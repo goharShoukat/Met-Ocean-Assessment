@@ -25,6 +25,8 @@ The other libraries required come preinstalled with your Python installation. We
 - pip install haversine
 - pip install joblib
 - pip install pandas
+- pip install openpyxl
+- pip instsall cdsapi
 
 Please be warned that downloading and installing libraries from Spyder's terminal may break the dependencies of your pre-existing libraries that come with Anaconda. Please open an issue and let us know if this is the case. 
 
